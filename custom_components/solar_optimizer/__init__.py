@@ -30,6 +30,7 @@ from .const import (
     SERVICE_RESET_ON_TIME,
     SERVICE_START_DEVICE,
     SERVICE_STOP_DEVICE,
+    SERVICE_CLEAR_OVERRIDE,
     validate_time_format,
     name_to_unique_id,
     CONF_NAME,
@@ -200,6 +201,24 @@ async def async_setup(
         hass.async_create_task(coordinator.async_refresh())
 
     hass.services.async_register(DOMAIN, SERVICE_STOP_DEVICE, _handle_stop_device)
+
+    async def _handle_clear_override(call):
+        """Handle solar_optimizer.clear_override service call: lets an automation
+        explicitly resume Solar Optimizer management of a device without having to
+        know it works by toggling the Enable switch under the hood."""
+        coordinator = SolarOptimizerCoordinator.get_coordinator()
+        if coordinator is None:
+            _LOGGER.error("clear_override: coordinator not found")
+            return
+        device_id = call.data.get("device_id")
+        device = coordinator.get_device_by_unique_id(device_id)
+        if device is None:
+            _LOGGER.warning("clear_override: device '%s' not found", device_id)
+            return
+        device.clear_override()
+        hass.async_create_task(coordinator.async_refresh())
+
+    hass.services.async_register(DOMAIN, SERVICE_CLEAR_OVERRIDE, _handle_clear_override)
 
     await async_setup_reload_service(hass, DOMAIN, PLATFORMS)
 

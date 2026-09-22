@@ -760,7 +760,7 @@ class SolarOptimizerCard extends HTMLElement {
         <div class="so-stat-box">
           <ha-icon icon="mdi:bullseye-arrow" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('algoObjective')}</span>
-          <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(2) + " €" : bestObjective}</span>
+          <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(3) : bestObjective}</span>
         </div>
       </div>
       <div style="display:block;">

@@ -12,7 +12,7 @@ from homeassistant.util import dt as dt_util
 from homeassistant.helpers.template import Template, is_template_string
 
 SOLAR_OPTIMIZER_DOMAIN = DOMAIN = "solar_optimizer"
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH, Platform.SELECT]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH, Platform.SELECT, Platform.BINARY_SENSOR]
 
 DEVICE_MANUFACTURER = "JMCOLLIN"
 DEVICE_MODEL = "Solar Optimizer"
@@ -39,6 +39,7 @@ DEVICE_MANUFACTURER = "JM. COLLIN"
 SERVICE_RESET_ON_TIME = "reset_on_time"
 SERVICE_START_DEVICE = "start_device"
 SERVICE_STOP_DEVICE = "stop_device"
+SERVICE_CLEAR_OVERRIDE = "clear_override"
 
 TIME_REGEX = r"^(?:[01]\d|2[0-3]):[0-5]\d$"
 CONFIG_VERSION = 2
