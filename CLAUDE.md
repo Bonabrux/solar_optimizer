@@ -9,6 +9,28 @@ Rama de trabajo: `claude/solar-optimizer-improvements-6ynf06`
 No se debe abrir Pull Request hasta que el usuario lo pida explícitamente — probar
 todo a fondo primero. Todo el trabajo se pushea a esa rama en el fork.
 
+## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
+
+- **Estado real al día de hoy**: la rama `claude/solar-optimizer-improvements-6ynf06`
+  ya está pusheada a `origin` en GitHub (`git push -u origin ...` confirmado
+  exitoso), con Fase 1 y Fase 2 completas y commiteadas. Todavía **no hay
+  Pull Request abierto**.
+- Si esta sesión es nueva (contenedor efímero recién creado, o PC), la rama YA
+  existe en remoto — no hay que reconstruir nada, solo traerla:
+  ```bash
+  git fetch origin claude/solar-optimizer-improvements-6ynf06
+  git checkout claude/solar-optimizer-improvements-6ynf06
+  ```
+- Si al pushear aparece un error 403 tipo "Claude doesn't have GitHub access to
+  Bonabrux/solar_optimizer" (ya pasó una vez en esta sesión y el usuario lo
+  resolvió instalando/reconectando la app de Claude en GitHub), pedirle al
+  usuario que repita esa autorización: https://github.com/apps/claude/installations/select_target
+  o reconectar desde https://claude.ai/customize/connectors?auth_start=github&auth_start_force=1
+- Próximo paso real pendiente: el usuario va a probar todo a fondo en su
+  instalación real de HA (tiene previsto ~2 semanas). Hasta que no confirme que
+  quedó conforme, no corresponde tocar Fase 3/4 salvo que lo pida explícitamente,
+  y bajo ningún concepto abrir un PR sin que lo pida.
+
 ## Arquitectura (para orientarse rápido)
 
 - `coordinator.py` (`SolarOptimizerCoordinator`): refresca periódicamente
@@ -167,10 +189,15 @@ diferencias de comportamiento relevantes para estos tests.
 
 ## Pendiente / próximos pasos sugeridos
 
-1. Confirmar que la suite completa de tests pasa (ver arriba).
-2. Probar a fondo en una instalación real de HA antes de pedir el PR.
+1. ~~Confirmar que la suite completa de tests pasa~~ — ya confirmado (109 passed,
+   11 skipped, 0 failed) y ya pusheado a `origin/claude/solar-optimizer-improvements-6ynf06`.
+2. **Esto es lo que falta ahora**: el usuario prueba todo a fondo en su instalación
+   real de HA (dispositivo real con `power_entity_id`, override manual desde la
+   card y desde el dispositivo subyacente, servicio `clear_override`, el
+   binary_sensor de override, y que el historial/logbook muestre la atribución).
 3. Cuando el usuario esté conforme, avisar para recién ahí abrir el Pull Request
-   (explícitamente prohibido hacerlo antes).
+   (explícitamente prohibido hacerlo antes, incluso si todo el código ya está
+   pusheado a la rama).
 4. Diseñar Fase 3 (trifásico) en detalle antes de tocar código: nombres de campos
    de config, migración de configs existentes con `config_flow.py`/`CONFIG_VERSION`.
 5. Fase 4 (batería) después de Fase 3.
