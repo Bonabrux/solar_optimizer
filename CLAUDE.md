@@ -198,7 +198,7 @@ uv pip install -p .venv homeassistant==2026.6.1 pytest-homeassistant-custom-comp
 .venv/bin/python -m pytest tests/ -q -p no:cacheprovider
 ```
 
-Resultado (06/10/2026): 109 passed, 11 skipped tanto con 2026.6.1 como con
+Resultado (06/10/2026): 110 passed, 11 skipped tanto con 2026.6.1 como con
 **2026.9.4** (la versión que corre el usuario en su HA). Para 2026.9 hubo que adaptar
 2 tests: `input_number.async_set_value` ya no funciona (se usa el servicio
 `input_number.set_value`), y el listener de estado ahora corre durante
@@ -222,6 +222,13 @@ El usuario copió la rama a su HA y no vio cambios. Diagnóstico y correcciones:
   barra y el gráfico de potencia (que ahora también aparece en on/off), con línea
   punteada en `power_max` para comparar presupuesto vs real. El algoritmo NO lo usa:
   el usuario quiere que siga usando su `power_max` como presupuesto.
+- **Barra en 0 sin sensor medido**: bug preexistente en `ManagedDevice.__init__`
+  (ternario invertido: un on/off ya encendido al arrancar quedaba con
+  `current_power = power_min = -1` hasta el primer refresh). Corregido + test. La card
+  además usa `power_max` como respaldo para on/off cuando no hay sensor medido.
+- **Real > presupuesto**: la barra se pinta naranja (`--warning-color`), el número
+  también, y una marca vertical indica dónde termina el presupuesto. El gráfico
+  agranda la escala y la línea queda sobre la punteada del presupuesto.
 
 ## Pendiente / próximos pasos sugeridos
 

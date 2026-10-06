@@ -333,6 +333,16 @@ class SolarOptimizerCard extends HTMLElement {
             height: 100%;
             transition: width 0.3s ease;
           }
+          solar-optimizer-card .so-power-bar-over {
+            background-color: var(--warning-color, #ff9800);
+          }
+          solar-optimizer-card .so-power-bar-budget {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--primary-text-color);
+          }
           solar-optimizer-card .so-priority-control {
             display: flex;
             align-items: center;
@@ -523,7 +533,10 @@ class SolarOptimizerCard extends HTMLElement {
       // Capteur de puissance mesurée (optionnel, affichage seulement) : prioritaire sur l'estimation
       const measuredId = attrs.measured_power_entity_id || null;
       const measuredPower = measuredId ? this._powerW(this._hass.states[measuredId]) : null;
-      const currentPower = measuredPower != null ? Math.round(measuredPower) : (isActive ? (attrs.current_power || 0) : 0);
+      // Sans mesure : budget configuré (power_max) pour un on/off, puissance courante pour un variable
+      const plannedPower = attrs.can_change_power ? (attrs.current_power || 0) : powerMax;
+      const currentPower = measuredPower != null ? Math.round(measuredPower) : (isActive ? plannedPower : 0);
+      const overBudget = powerMax > 0 && currentPower > powerMax;
       const requestedPower = attrs.requested_power || 0;
 
       // Priorité
@@ -539,6 +552,8 @@ class SolarOptimizerCard extends HTMLElement {
       const totalRange = powerMax - powerMin;
       const rawPercent = (currentPower > 0 && totalRange > 0) ? ((currentPower - powerMin) / totalRange) * 100 : (currentPower > 0 ? 100 : 0);
       const powerPercent = currentPower <= 0 ? 0 : Math.min(100, Math.max(0, Math.round(rawPercent)));
+      // Au-delà du budget : barre pleine orange + repère à la position du budget
+      const budgetMarkPercent = overBudget ? Math.round(((powerMax - powerMin) / (currentPower - powerMin)) * 100) : null;
 
       let statusBadge = "";
       if (!isEnabled && isActive) {
@@ -702,10 +717,11 @@ class SolarOptimizerCard extends HTMLElement {
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:8px; font-size:0.85em; color:var(--secondary-text-color); padding: 0 4px;">
-            <span><strong style="color:var(--primary-text-color);">${currentPower} W</strong> / ${powerMax} W</span>
+            <span><strong style="color:${overBudget ? 'var(--warning-color, #ff9800)' : 'var(--primary-text-color)'};">${currentPower} W</strong> / ${powerMax} W</span>
             ${powerMax > 0 ? `
               <div class="so-power-bar-container" style="flex:1; margin-top:0;">
-                ${powerPercent > 0 ? `<div class="so-power-bar" style="width: ${powerPercent}%"></div>` : ''}
+                ${powerPercent > 0 ? `<div class="so-power-bar${overBudget ? ' so-power-bar-over' : ''}" style="width: ${powerPercent}%"></div>` : ''}
+                ${overBudget ? `<div class="so-power-bar-budget" style="left: ${budgetMarkPercent}%"></div>` : ''}
               </div>
             ` : ''}
           </div>

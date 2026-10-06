@@ -158,3 +158,25 @@ async def test_best_objective_is_not_monetary(
     assert best_objective_sensor.device_class is None
     assert best_objective_sensor.native_unit_of_measurement is None
     assert best_objective_sensor.device_class != SensorDeviceClass.MONETARY
+
+
+async def test_on_off_device_already_on_at_startup_reports_power_max(
+    hass: HomeAssistant, init_solar_optimizer_central_config
+):
+    """An on/off device already on when SO starts must report power_max as current
+    power, not power_min (-1): the init ternary was inverted, so the card bar showed
+    0 until the first coordinator refresh."""
+
+    hass.states.async_set("input_boolean.fake_device_a", "on")
+
+    entry_a = MockConfigEntry(
+        domain=DOMAIN,
+        title="Equipement A",
+        unique_id="eqtAUniqueId",
+        data=DEVICE_A_DATA,
+    )
+    device = await create_managed_device(hass, entry_a, "equipement_a")
+
+    assert device.can_change_power is False
+    assert device.is_active is True
+    assert device.current_power == 1000

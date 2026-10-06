@@ -222,7 +222,7 @@ class ManagedDevice:
             ).time()
 
         if self.is_active:
-            self._requested_power = self._current_power = self.power_max if self._can_change_power else self._power_min
+            self._requested_power = self._current_power = self.power_max if not self._can_change_power else self._power_min
 
         self._enable = True
 
