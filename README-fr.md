@@ -21,6 +21,7 @@
 - [La configuration](#la-configuration)
   - [Configurer l'intégration pour la première fois](#configurer-lintégration-pour-la-première-fois)
   - [Installations triphasées](#installations-triphasées)
+  - [Utilisation de la batterie par équipement](#utilisation-de-la-batterie-par-équipement)
   - [Configurer les équipements](#configurer-les-équipements)
     - [Configurer un équipement simple (on/off)](#configurer-un-équipement-simple-onoff)
   - [Configurer un équipement avec une puissance variable](#configurer-un-équipement-avec-une-puissance-variable)
@@ -186,6 +187,15 @@ Puis renseignez la **Phase** de chaque équipement : `1`, `2`, `3`, ou `Triphas�
 
 En monophasé, les champs par phase et la phase des équipements sont ignorés.
 
+## Utilisation de la batterie par équipement
+
+Chaque équipement a une option **Utilisation de la batterie** :
+- `Batterie d'abord` : l'équipement utilise seulement le surplus restant **après la charge de la batterie**. Il ne prend jamais la puissance qui charge la batterie et ne la décharge pas.
+- `Équipement d'abord` (par défaut, comportement historique) : l'équipement peut prendre la puissance qui **charge la batterie**, mais ne la décharge pas.
+- `Utiliser la batterie` : l'équipement peut aussi fonctionner en **déchargeant la batterie**, jusqu'à son `battery_soc_threshold`. La **puissance de décharge max de la batterie** (optionnelle) des paramètres communs limite ce que la batterie peut fournir (si vide, la décharge mesurée est la limite).
+
+Solar Optimizer ne pilote pas l'onduleur : cette option décide **quand l'équipement est allumé**. En triphasé, l'utilisation de la batterie et le `battery_soc_threshold` sont ignorés pour un équipement qui n'est pas sur la phase de l'onduleur de la batterie, puisque la batterie n'a pas d'effet sur lui.
+
 ## Configurer les équipements
 Chaque équipements pilotable doit ensuite être configuré en ajoutant une nouvelle intégration via la bouton "Ajouter un équipement" disponible dans la page de l'intégration :
 
@@ -214,6 +224,7 @@ Vous devez spécifier les attributs suivant :
 | `action_mode`                 | tous                                    | le mode d'action pour allumer ou éteindre l'équipement. Peut être "action_call" ou "event" (*)                                                                                                                                               | action_call                                           | "action_call" indique que l'équipement s'allume et s'éteint via une action. Cf. ci-dessous. "event" indique qu'un évènement est envoyé lorsque l'état doit changer. Cf. (*)                                                                    |
 | `activation_service`          | uniquement si action_mode="action_call" | le service a appeler pour activer l'équipement sous la forme "domain/service[/parameter:value]". Ce template doit être adapté pour tous les équipements qui ne sont pas des switchs                                                          | switch/turn_on                                        | l'activation déclenchera le service "switch/turn_on" sur l'entité "entity_id". La syntaxe acceptée est la suivante : domain/action[/parameter:value]                                                                                           |
 | `deactivation_service`        | uniquement si action_mode="action_call" | le service a appeler pour désactiver l'équipement sous la forme "domain/service[/parameter:value]". Ce template doit être adapté pour tous les devices qui ne sont pas des switchs                                                           | switch/turn_off                                       | la désactivation déclenchera le service "switch/turn_off" sur l'entité "entity_id". La syntaxe acceptée est la suivante : domain/action[/parameter:value]                                                                                      |
+| `battery_policy`              | tous                                    | Comment l'équipement peut utiliser la batterie : `battery_first`, `load_first` (par défaut) ou `use_battery`                                                                                                                                 | load_first                                            | Cf. [Utilisation de la batterie par équipement](#utilisation-de-la-batterie-par-équipement)                                                                                                                                                  |
 | `battery_soc_threshold`       | tous                                    | le pourcentage minimal de charge de la batterie pour que l'équipement soit utilisable                                                                                                                                                        | 30                                                    | Dans cet exemple, l'équipement ne sera utilisable par l'algorithme si la batterie solaire n'est pas chargée à au moins 30%. Nécessite le renseignement de l'entité d'état de charge de la batterie dans les paramètres communs. Cf. ci-dessus. |
 | `max_on_time_per_day_min`     | tous                                    | le nombre de minutes maximal en position allumé pour cet équipement. Au delà, l'équipement n'est plus utilisable par l'algorithme                                                                                                            | 10                                                    | L'équipement sera allumé au maximum 10 minutes par jour                                                                                                                                                                                        |
 | `min_on_time_per_day_min`     | tous                                    | le nombre de minutes minimale en position allumé pour cet équipement. Si lors du démarrage des heures creuses, ce minimum n'est pas atteint alors l'équipement sera allumé à concurrence du début de journée ou du `max_on_time_per_day_min` | 5                                                     | L'équipement est sera allumé au minimum 5 minutes par jour ; soit pendant la production solaire, soit pendant les heures creuses                                                                                                               |

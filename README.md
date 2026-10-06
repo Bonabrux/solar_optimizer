@@ -21,6 +21,7 @@
 - [The configuration](#the-configuration)
   - [Configure the Integration for the First Time](#configure-the-integration-for-the-first-time)
   - [Three-phase installations](#three-phase-installations)
+  - [Battery usage per device](#battery-usage-per-device)
   - [Configure the Devices](#configure-the-devices)
     - [Configuring a Simple Device (On/Off)](#configuring-a-simple-device-onoff)
   - [Configuring a Device with Variable Power](#configuring-a-device-with-variable-power)
@@ -202,6 +203,15 @@ Then set the **Phase** of each device: `1`, `2`, `3`, or `Three-phase (L1+L2+L3)
 
 In single-phase mode, the per-phase fields and the device phase are ignored.
 
+## Battery usage per device
+
+Each device has a **Battery usage** option:
+- `Battery first`: the device only uses the surplus left **after charging the battery**. It never takes the power charging the battery nor discharges it.
+- `Load first` (default, the historical behavior): the device may take the power that is **charging the battery**, but never discharges it.
+- `Use battery`: the device may also run by **discharging the battery**, down to its `battery_soc_threshold`. The optional **battery max discharge power** of the common parameters limits what the battery can give (if empty, the measured discharge is the limit).
+
+Solar Optimizer does not drive the inverter: this option decides **when the device is turned on**. In three-phase, the battery usage and the `battery_soc_threshold` are ignored for a device that is not on the phase of the battery inverter, since the battery has no effect on it.
+
 ## Configure the Devices
 Each controllable device must be configured by adding a new integration via the "Add a device" button available on the integration page:
 
@@ -230,6 +240,7 @@ You need to specify the following attributes:
 | `action_mode`                 | All                                 | The action mode used to turn the device on or off. Can be either `"action_call"` or `"event"` (*).                                                                                                                                     | action_call                                      | `"action_call"` indicates that the device is controlled via an action call. See below. `"event"` means an event is triggered when the state should change. See (*) for more details.                              |
 | `activation_service`          | Only if `action_mode="action_call"` | The service to call for activating the device, in the format `"domain/service[/parameter:value]"`. This template should be adapted when the device is not a switch.                                                                    | switch/turn_on                                   | Activating the device will trigger the `"switch/turn_on"` service on the `entity_id` specified.                                                                                                                   |
 | `deactivation_service`        | Only if `action_mode="action_call"` | The service to call for deactivating the device, in the format `"domain/service[/parameter:value]"`.  This template should be adapted when the device is not a switch.                                                                 | switch/turn_off                                  | Deactivating the device will trigger the `"switch/turn_off"` service on the `entity_id` specified.                                                                                                                |
+| `battery_policy`              | All                                 | How the device may use the battery: `battery_first`, `load_first` (default) or `use_battery`.                                                                                                                                        | load_first                                       | See [Battery usage per device](#battery-usage-per-device).                                                                                                                                                         |
 | `battery_soc_threshold`       | All                                 | The minimum battery charge percentage required for the device to be usable.                                                                                                                                                            | 30                                               | In this example, the device will not be used by the algorithm if the solar battery is not charged to at least 30%. Requires the battery charge state entity to be configured in the common parameters. See above. |
 | `max_on_time_per_day_min`     | All                                 | The maximum number of minutes the device can be on per day. Once exceeded, the device will no longer be used by the algorithm.                                                                                                         | 10                                               | The device will be turned on for a maximum of 10 minutes per day.                                                                                                                                                 |
 | `min_on_time_per_day_min`     | All                                 | The minimum number of minutes the device should be on per day. If this threshold is not reached by the start of off-peak hours, the device will be activated until the start of the day or until `max_on_time_per_day_min` is reached. | 5                                                | The device will run for at least 5 minutes per day, either during solar production or during off-peak hours.                                                                                                      |

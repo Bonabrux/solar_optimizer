@@ -209,6 +209,7 @@ class ManagedDeviceSwitch(CoordinatorEntity, SwitchEntity, RestoreEntity):
             "current_power": device.current_power,
             "measured_power_entity_id": device.measured_power_entity_id,
             "phase": device.phase,
+            "battery_policy": device.battery_policy,
             "requested_power": device.requested_power,
             "duration_sec": device.duration_sec,
             "duration_power_sec": device.duration_power_sec,

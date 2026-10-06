@@ -36,6 +36,8 @@ from .const import (
     CONF_POWER_CONSUMPTION_L2_ENTITY_ID,
     CONF_POWER_CONSUMPTION_L3_ENTITY_ID,
     CONF_BATTERY_PHASE,
+    CONF_BATTERY_MAX_DISCHARGE_POWER,
+    DEFAULT_PHASE,
     PHASES,
     phase_shares,
 )
@@ -75,6 +77,7 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         self._power_production_entity_id: str = None
         self._phase_entity_ids: dict[str, str] | None = None
         self._battery_phase: str | None = None
+        self._battery_max_discharge: float | None = None
         self._subscribe_to_events: bool = False
         self._unsub_events = None
         self._unsub_raz_override = None
@@ -137,6 +140,7 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
                 )
             )
         self._battery_phase = config.data.get(CONF_BATTERY_PHASE)
+        self._battery_max_discharge = config.data.get(CONF_BATTERY_MAX_DISCHARGE_POWER)
 
         if self._unsub_events is not None:
             self._unsub_events()
@@ -270,12 +274,13 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         # added to the phase(s) of the inverter (like it is added to the global net below)
         phase_consumption = None
         calculated_data["power_consumption_phases"] = None
+        battery_shares = phase_shares(self._battery_phase) if self._phase_entity_ids else {DEFAULT_PHASE: 1.0}
         if self._phase_entity_ids:
             phases = {p: get_safe_float(self.hass, entity_id, "W") for p, entity_id in self._phase_entity_ids.items()}
             calculated_data["power_consumption_phases"] = phases
             if None not in phases.values():
                 phase_consumption = dict(phases)
-                for p, share in phase_shares(self._battery_phase).items():
+                for p, share in battery_shares.items():
                     phase_consumption[p] += share * calculated_data["battery_charge_power"]
             else:
                 phase_consumption = phases  # the algorithm abandons the calculation if a phase is unknown
@@ -293,6 +298,9 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
             calculated_data["battery_soc"],
             calculated_data["priority_weight"],
             phase_consumption,
+            # Battery power and max discharge on the phase(s) of the inverter (single-phase: phase 1)
+            {p: share * calculated_data["battery_charge_power"] for p, share in battery_shares.items()},
+            {p: share * self._battery_max_discharge for p, share in battery_shares.items()} if self._battery_max_discharge else None,
         )
 
         calculated_data["best_solution"] = best_solution

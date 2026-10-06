@@ -5,7 +5,13 @@ import math
 import copy
 
 from .managed_device import ManagedDevice
-from .const import DEFAULT_PHASE, phase_shares
+from .const import (
+    DEFAULT_PHASE,
+    phase_shares,
+    BATTERY_POLICY_BATTERY_FIRST,
+    BATTERY_POLICY_LOAD_FIRST,
+    BATTERY_POLICY_USE_BATTERY,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,6 +65,8 @@ class SimulatedAnnealingAlgorithm:
         battery_soc: float,
         priority_weight: int,
         phase_consumption: dict[str, float] | None = None,
+        battery_power: dict[str, float] | None = None,
+        battery_max_discharge: dict[str, float] | None = None,
     ):
         """The entrypoint of the algorithm:
         You should give:
@@ -72,6 +80,11 @@ class SimulatedAnnealingAlgorithm:
          - priority_weight: the weight of the priority in the cost calculation. 10 means 10%
          - phase_consumption: three-phase only, the net consumption of each phase ({"1": W, "2": W, "3": W}).
            Each device then only changes the net of its own phase(s). None means single-phase.
+         - battery_power: the battery power on each phase of the battery inverter (negative when charging,
+           positive when discharging), already included in the net consumption. Only devices on one of these
+           phases are affected by the battery (policy and battery_soc_threshold). None means all devices.
+         - battery_max_discharge: the max discharge power of the battery on each of its phases. None means the
+           measured discharge is the limit.
 
          In return you will have:
           - best_solution: a list of object in whitch name, power_max and state are set,
@@ -109,6 +122,8 @@ class SimulatedAnnealingAlgorithm:
         self._consommation_net = dict(phase_consumption) if three_phase else {DEFAULT_PHASE: power_consumption}
         self._production_solaire = solar_power_production
         self._priority_weight = priority_weight / 100.0  # to get percentage
+        self._batterie = dict(battery_power) if battery_power else {}
+        self._decharge_max = battery_max_discharge
 
         # fix #131 - costs cannot be negative or 0
         if self._cout_achat <= 0 or self._cout_revente <= 0:
@@ -125,7 +140,10 @@ class SimulatedAnnealingAlgorithm:
                 _LOGGER.debug("%s is disabled. Forget it", device.name)
                 continue
 
-            device.set_battery_soc(battery_soc)
+            phases = phase_shares(device.phase) if three_phase else {DEFAULT_PHASE: 1.0}
+            # A device on a phase without the battery ignores everything about the battery
+            battery_affected = battery_power is None or any(phase in self._batterie for phase in phases)
+            device.set_battery_soc(battery_soc if battery_affected else None)
             usable = device.is_usable
             waiting = device.is_waiting
             # Force deactivation if active, not usable and not waiting
@@ -149,7 +167,8 @@ class SimulatedAnnealingAlgorithm:
                     "is_waiting": waiting,
                     "can_change_power": device.can_change_power,
                     "priority": device.priority,
-                    "phases": phase_shares(device.phase) if three_phase else {DEFAULT_PHASE: 1.0},
+                    "phases": phases,
+                    "battery_policy": device.battery_policy if battery_affected else BATTERY_POLICY_LOAD_FIRST,
                 }
             )
         if DEBUG:
@@ -221,6 +240,8 @@ class SimulatedAnnealingAlgorithm:
 
         puissance_totale_eqt = self.consommation_equipements(solution)
         puissance_phases = self.consommation_phases(solution)
+        puissance_phases_bf = self.consommation_phases(solution, BATTERY_POLICY_BATTERY_FIRST)
+        puissance_phases_ub = self.consommation_phases(solution, BATTERY_POLICY_USE_BATTERY)
 
         cout_revente_impose = self._cout_revente * (1.0 - self._taxe_revente / 100.0)
         coef_import = (self._cout_achat) / (self._cout_achat + cout_revente_impose)
@@ -234,6 +255,10 @@ class SimulatedAnnealingAlgorithm:
             new_consommation_net = consommation_net + diff_puissance_eqt
             new_rejets = 0 if new_consommation_net >= 0 else -new_consommation_net
             new_import = 0 if new_consommation_net < 0 else new_consommation_net
+            if phase in self._batterie:
+                new_import, new_rejets = self.appliquer_politique_batterie(
+                    phase, consommation_net, new_import, new_rejets, puissance_phases_bf[phase], puissance_phases_ub[phase]
+                )
             if DEBUG:
                 _LOGGER.debug(
                     "Objectif phase %s : cette solution ajoute %.3fW a la consommation initiale. Nouvelle consommation nette=%.3fW. Nouveaux rejets=%.3fW",
@@ -258,7 +283,35 @@ class SimulatedAnnealingAlgorithm:
         """Generate the initial solution (which is the solution given in argument) and calculate the total initial power"""
         self._puissance_totale_eqt_initiale = self.consommation_equipements(solution)
         self._puissance_phases_initiale = self.consommation_phases(solution)
+        self._puissance_phases_initiale_ub = self.consommation_phases(solution, BATTERY_POLICY_USE_BATTERY)
         return copy.deepcopy(solution)
+
+    def appliquer_politique_batterie(self, phase, consommation_net, new_import, new_rejets, puissance_bf, puissance_ub):
+        """Adjust import/export of a battery phase to the battery policy of the devices.
+        The net consumption counts the battery charging power as available to all devices
+        (load_first). Then:
+        - battery_first devices only get the grid surplus: the charging power they take
+          is counted as import (and the battery charging they prevent as export)
+        - use_battery devices may cover their import by discharging the battery
+        With only load_first devices, nothing changes."""
+        batterie = self._batterie[phase]
+        charge = max(0, -batterie)
+        decharge = max(0, batterie)
+
+        if charge > 0 and puissance_bf > 0:
+            # grid surplus without the battery charging and without the managed devices already on
+            surplus_reseau = max(0, self._puissance_phases_initiale[phase] - (consommation_net - batterie))
+            charge_prise = min(charge, max(0, puissance_bf - surplus_reseau))
+            new_import += charge_prise
+            new_rejets += charge_prise
+
+        if new_import > 0 and puissance_ub > 0:
+            decharge_max = self._decharge_max[phase] if self._decharge_max else decharge
+            # discharge already used by other loads than the use_battery devices initially on
+            decharge_autres = max(0, decharge - self._puissance_phases_initiale_ub[phase])
+            new_import -= min(new_import, puissance_ub, max(0, decharge_max - decharge_autres))
+
+        return new_import, new_rejets
 
     def consommation_equipements(self, solution):
         """The total power consumption for all active equipement"""
@@ -268,11 +321,11 @@ class SimulatedAnnealingAlgorithm:
             if equipement["state"]
         )
 
-    def consommation_phases(self, solution) -> dict[str, float]:
-        """The power consumption of all active equipment, per phase"""
+    def consommation_phases(self, solution, battery_policy=None) -> dict[str, float]:
+        """The power consumption of all active equipment (or only those with this battery policy), per phase"""
         phases = {phase: 0 for phase in self._consommation_net}
         for equipement in solution:
-            if equipement["state"]:
+            if equipement["state"] and battery_policy in (None, equipement["battery_policy"]):
                 for phase, share in equipement["phases"].items():
                     phases[phase] += share * equipement["requested_power"]
         return phases

@@ -32,6 +32,7 @@
           "battery_soc_entity_id": "Stato di carica della batteria",
           "battery_charge_power_entity_id": "Potenza di carica della batteria",
           "battery_phase": "Fase della batteria / inverter ibrido",
+          "battery_max_discharge_power": "Potenza massima di scarica della batteria",
           "raz_time": "Orario di reset del contatore"
         },
         "data_description": {
@@ -50,6 +51,7 @@
           "battery_soc_entity_id": "L'entity_id dello stato di carica della batteria in %. Se non è presente una batteria, lasciare vuoto",
           "battery_charge_power_entity_id": "L'entity_id della potenza di carica della batteria in watt. Deve essere negativo se la batteria si sta caricando e positivo se la batteria si sta scaricando. Lasciare vuoto se non viene utilizzata alcuna batteria.",
           "battery_phase": "Solo trifase. La fase a cui è collegato l'inverter della batteria, o tutte le fasi per un inverter trifase.",
+          "battery_max_discharge_power": "Opzionale. La potenza massima di scarica dell'inverter della batteria in W, usata dai dispositivi autorizzati a usare la batteria. Se vuoto, il limite è la scarica misurata.",
           "raz_time": "Orario di reset dei contatori del tempo di attività. Dovrebbe essere prima dell'alba, ma non troppo presto, in modo da lasciare tempo sufficiente per l'attivazione notturna"
         }
       },
@@ -70,6 +72,7 @@
           "activation_service": "Servizio di attivazione",
           "deactivation_service": "Servizio di disattivazione",
           "battery_soc_threshold": "Livello di batteria",
+          "battery_policy": "Uso della batteria",
           "max_on_time_per_day_min": "Tempo MAX al giorno",
           "min_on_time_per_day_min": "Tempo MIN al giorno",
           "offpeak_time": "Orario fuori picco"
@@ -88,6 +91,7 @@
           "activation_service": "Il servizio per attivare il dispositivo. Esempio `switch/turn_on` o `climate/set_hvac_mode/hvac_mode:cool`",
           "deactivation_service": "Il servizio per disattivare il dispositivo. Esempio `switch/turn_off` o `climate/set_hvac_mode/hvac_mode:off`. Lasciare vuoto se il dispositivo si spegne da solo",
           "battery_soc_threshold": "Indicare il livello di carica della batteria per attivare il dispositivo. Può essere un numero o un modello",
+          "battery_policy": "Come il dispositivo può usare la batteria solare. Prima la batteria: solo il surplus rimasto dopo la carica della batteria. Prima il carico (predefinito): può prendere la potenza che carica la batteria. Usa la batteria: può anche scaricare la batteria fino alla soglia della batteria. In trifase, ignorato se il dispositivo non è sulla fase della batteria.",
           "max_on_time_per_day_min": "Tempo massimo di attivazione giornaliera in minuti. Può essere un numero o un modello. Se il tempo massimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta fino al raggiungimento del tempo massimo",
           "min_on_time_per_day_min": "Il tempo minimo giornaliero in minuti. Può essere un numero o un modello. Se il tempo minimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta fino al raggiungimento del tempo massimo",
           "offpeak_time": "Ora di inizio del periodo non di punta (off-peak) con il formato HH:MM"
@@ -116,6 +120,7 @@
           "change_power_service": "Servizio di variazione della potenza",
           "convert_power_divide_factor": "Fattore di divisione",
           "battery_soc_threshold": "Soglia di carica della batteria",
+          "battery_policy": "Uso della batteria",
           "max_on_time_per_day_min": "Max in tempo al giorno",
           "min_on_time_per_day_min": "Min in tempo al giorno",
           "offpeak_time": "Orario non di punta"
@@ -140,6 +145,7 @@
           "change_power_service": "Il servizio utilizzato per modificare la potenza. Es. `number/set_value`",
           "convert_power_divide_factor": "Il fattore di divisione per convertire la potenza nell'unità di misura del dispositivo di alimentazione. In caso di conversione da watt in ampere, il divisore dovrebbe essere 230",
           "battery_soc_threshold": "Livello di carica della batteria per attivare il dispositivo. Può essere un numero o un modello",
+          "battery_policy": "Come il dispositivo può usare la batteria solare. Prima la batteria: solo il surplus rimasto dopo la carica della batteria. Prima il carico (predefinito): può prendere la potenza che carica la batteria. Usa la batteria: può anche scaricare la batteria fino alla soglia della batteria. In trifase, ignorato se il dispositivo non è sulla fase della batteria.",
           "max_on_time_per_day_min": "La durata massima giornaliera dell'accensione del dispositivo, in minuti. Può essere un numero o un modello. Se il tempo massimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta fino al raggiungimento del tempo massimo",
           "min_on_time_per_day_min": "La durata minima giornaliera dell'accensione del dispositivo, in minuti. Può essere un numero o un modello. Se il tempo minimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta",
           "offpeak_time": "Il tempo Offpeak con il formato HH: MM"
@@ -183,6 +189,7 @@
           "battery_soc_entity_id": "Stato di carica della batteria",
           "battery_charge_power_entity_id": "Potenza di ricarica della batteria",
           "battery_phase": "Fase della batteria / inverter ibrido",
+          "battery_max_discharge_power": "Potenza massima di scarica della batteria",
           "raz_time": "Ripristina il contatore"
         },
         "data_description": {
@@ -201,6 +208,7 @@
           "battery_soc_entity_id": "Entity_id dello stato di carica della batteria in %. Se non si dispone di una batteria, lasciare il campo vuoto",
           "battery_charge_power_entity_id": "L'entity_id che misura la potenza istantanea da/verso la batteria. Deve essere espresso in watt e deve essere positivo se la batteria si scarica e negativo se si carica. Lasciare vuoto se non si dispone di una batteria solare.",
           "battery_phase": "Solo trifase. La fase a cui è collegato l'inverter della batteria, o tutte le fasi per un inverter trifase.",
+          "battery_max_discharge_power": "Opzionale. La potenza massima di scarica dell'inverter della batteria in W, usata dai dispositivi autorizzati a usare la batteria. Se vuoto, il limite è la scarica misurata.",
           "raz_time": "Tempo per ripristinare i contatori del tempo attivo"
         }
       },
@@ -221,6 +229,7 @@
           "activation_service": "Servizio di attivazione",
           "deactivation_service": "Servizio di disattivazione",
           "battery_soc_threshold": "Soglia di carica della batteria",
+          "battery_policy": "Uso della batteria",
           "max_on_time_per_day_min": "Max in tempo al giorno",
           "min_on_time_per_day_min": "Min in tempo al giorno",
           "offpeak_time": "Tempo fuori campo"
@@ -239,6 +248,7 @@
           "activation_service": "Il servizio per attivare il dispositivo. Es. `switch/turn_on` or `climate/set_hvac_mode/hvac_mode:cool`",
           "deactivation_service": "Il servizio per disattivare il dispositivo. Esempio `switch/turn_off` o `climate/set_hvac_mode/hvac_mode:off`. Lasciare vuoto se il dispositivo si spegne da solo",
           "battery_soc_threshold": "Il livello di carica della batteria per attivare il dispositivo. Può essere un numero o un modello",
+          "battery_policy": "Come il dispositivo può usare la batteria solare. Prima la batteria: solo il surplus rimasto dopo la carica della batteria. Prima il carico (predefinito): può prendere la potenza che carica la batteria. Usa la batteria: può anche scaricare la batteria fino alla soglia della batteria. In trifase, ignorato se il dispositivo non è sulla fase della batteria.",
           "max_on_time_per_day_min": "La durata massima giornaliera dell'accensione del dispositivo, in minuti. Può essere un numero o un modello. Se il tempo massimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta fino al raggiungimento del tempo massimo",
           "min_on_time_per_day_min": "La durata minima giornaliera dell'accensione del dispositivo, in minuti. Può essere un numero o un modello. Se il tempo minimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta",
           "offpeak_time": "Il tempo Offpeak con il formato HH: MM"
@@ -267,6 +277,7 @@
           "change_power_service": "Servizio di modifica dell'energia",
           "convert_power_divide_factor": "Fattore di divisione",
           "battery_soc_threshold": "Soglia di carica della batteria",
+          "battery_policy": "Uso della batteria",
           "max_on_time_per_day_min": "Max in tempo al giorno",
           "min_on_time_per_day_min": "Min in tempo al giorno",
           "offpeak_time": "Tempo fuori campo"
@@ -291,6 +302,7 @@
           "change_power_service": "Il servizio utilizzato per modificare la potenza. Es. `number/set_value`",
           "convert_power_divide_factor": "Il fattore di divisione per convertire la potenza nell'unità di misura del dispositivo di alimentazione. In caso di conversione da watt in ampere, il divisore dovrebbe essere 230",
           "battery_soc_threshold": "Il livello di carica della batteria per attivare il dispositivo. Può essere un numero o un modello",
+          "battery_policy": "Come il dispositivo può usare la batteria solare. Prima la batteria: solo il surplus rimasto dopo la carica della batteria. Prima il carico (predefinito): può prendere la potenza che carica la batteria. Usa la batteria: può anche scaricare la batteria fino alla soglia della batteria. In trifase, ignorato se il dispositivo non è sulla fase della batteria.",
           "max_on_time_per_day_min": "La durata massima giornaliera dell'accensione del dispositivo, in minuti. Può essere un numero o un modello. Se il tempo massimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta fino al raggiungimento del tempo massimo",
           "min_on_time_per_day_min": "La durata minima giornaliera dell'accensione del dispositivo, in minuti. Può essere un numero o un modello. Se il tempo minimo non viene raggiunto durante le ore diurne, verrà attivato durante le ore non di punta",
           "offpeak_time": "Orario Offpeak nel formato HH: MM"
@@ -328,6 +340,13 @@
         "2": "Fase 2 (L2)",
         "3": "Fase 3 (L3)",
         "all": "Trifase (L1+L2+L3)"
+      }
+    },
+    "battery_policy": {
+      "options": {
+        "battery_first": "Prima la batteria",
+        "load_first": "Prima il carico",
+        "use_battery": "Usa la batteria"
       }
     }
   }

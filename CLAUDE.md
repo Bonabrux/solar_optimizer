@@ -90,9 +90,8 @@ valor monetario (estaba mal etiquetado como `SensorDeviceClass.MONETARY` con "�
 - **Fase 2** (override manual + moneda) — **HECHA en esta rama**
 - **Fase 3** (soporte trifásico) — **HECHA en `claude/three-phase`** (06/10/2026), pendiente
   de prueba real del usuario. Ver sección "Fase 3" abajo.
-- **Fase 4** (batería con prioridad de despacho) — **NO empezada**. Depende del
-  diseño de Fase 3 para ser preciso (inversor híbrido monofásico del usuario está
-  en una fase específica).
+- **Fase 4** (política de uso de batería por dispositivo) — **HECHA en
+  `claude/three-phase`** (06/10/2026), pendiente de prueba real. Ver sección "Fase 4".
 
 ## Qué se implementó en Fase 1
 
@@ -262,7 +261,7 @@ El usuario copió la rama a su HA y no vio cambios. Diagnóstico y correcciones:
 4. ~~Fase 3~~ hecha en `claude/three-phase`. Falta: prueba real del usuario y, con
    su OK final explícito, PR (rama limpia, sin CLAUDE.md, apilada sobre #215 o
    después de que #215 se mergee).
-5. Fase 4 (batería) después de Fase 3.
+5. ~~Fase 4~~ hecha en la misma rama. Falta prueba real del usuario.
 
 ## Fase 3: trifásico (implementada 06/10/2026)
 
@@ -286,3 +285,24 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
   escenarios monofásicos aleatorios con la misma semilla (script ad hoc, no commiteado).
   `tests/test_three_phase.py` (8 tests) falla si se anula el cálculo por fase.
   Suite: 121 passed, 11 skipped en HA 2026.6.1 y 2026.9.4.
+
+## Fase 4: uso de batería por dispositivo (implementada 06/10/2026)
+
+- Dispositivo: `battery_policy` = `battery_first` (solo excedente después de cargar la
+  batería, nunca la descarga) / `load_first` (por defecto = comportamiento histórico:
+  puede tomar la potencia de carga) / `use_battery` (además puede descargarla hasta su
+  `battery_soc_threshold`).
+- Central: `battery_max_discharge_power` (W, opcional; vacío = la descarga medida es el
+  límite, o sea que con la batería ociosa `use_battery` no puede usarla).
+- Regla del usuario: en trifásico, un dispositivo que no está en la fase de la batería
+  ignora TODO lo de batería (política y umbral SOC): se le pasa `battery_soc=None` y su
+  política se trata como `load_first`.
+- Algoritmo: `appliquer_politique_batterie()` ajusta import/export solo en las fases de la
+  batería: lo que `battery_first` le quita a la carga cuenta como import (y la carga que
+  impide como export); `use_battery` puede cubrir su import con descarga hasta el límite.
+  Con todos en `load_first` no cambia nada: verificado contra `upstream/main` en 500
+  escenarios con potencia de batería y límite de descarga (resultados idénticos).
+- SO no controla el inversor: la política decide cuándo prender cada dispositivo.
+- La card no muestra la política (posible mejora).
+- Tests: `tests/test_battery_policy.py` (10), verificados por mutación.
+  Suite: 131 passed, 11 skipped en HA 2026.6.1 y 2026.9.4.

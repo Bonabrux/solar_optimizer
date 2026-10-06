@@ -74,6 +74,9 @@ central_config_schema = vol.Schema(
         vol.Optional(CONF_BATTERY_PHASE, default=DEFAULT_PHASE): selector.SelectSelector(
             selector.SelectSelectorConfig(options=CONF_PHASE_OPTIONS, translation_key="phase", mode="dropdown")
         ),
+        vol.Optional(CONF_BATTERY_MAX_DISCHARGE_POWER): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=100000, step=1, unit_of_measurement="W", mode=selector.NumberSelectorMode.BOX)
+        ),
         vol.Optional(CONF_RAZ_TIME, default=DEFAULT_RAZ_TIME): str,
     }
 )
@@ -105,6 +108,9 @@ managed_device_schema = vol.Schema(
         vol.Required(CONF_ACTIVATION_SERVICE, default="switch/turn_on"): str,
         vol.Optional(CONF_DEACTIVATION_SERVICE, default="switch/turn_off"): str,
         vol.Optional(CONF_BATTERY_SOC_THRESHOLD, default=0): str,
+        vol.Optional(CONF_BATTERY_POLICY, default=BATTERY_POLICY_LOAD_FIRST): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=CONF_BATTERY_POLICIES, translation_key="battery_policy", mode="dropdown")
+        ),
         vol.Optional(CONF_MAX_ON_TIME_PER_DAY_MIN): str,
         vol.Optional(CONF_MIN_ON_TIME_PER_DAY_MIN): str,
         vol.Optional(CONF_OFFPEAK_TIME): str,
@@ -162,6 +168,9 @@ power_managed_device_schema = vol.Schema(
             selector.NumberSelectorConfig(min=1.0, max=9999, step=0.1, mode=selector.NumberSelectorMode.BOX)
         ),
         vol.Optional(CONF_BATTERY_SOC_THRESHOLD, default=0): str,
+        vol.Optional(CONF_BATTERY_POLICY, default=BATTERY_POLICY_LOAD_FIRST): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=CONF_BATTERY_POLICIES, translation_key="battery_policy", mode="dropdown")
+        ),
         vol.Optional(CONF_MAX_ON_TIME_PER_DAY_MIN): str,
         vol.Optional(CONF_MIN_ON_TIME_PER_DAY_MIN): str,
         vol.Optional(CONF_OFFPEAK_TIME): str,

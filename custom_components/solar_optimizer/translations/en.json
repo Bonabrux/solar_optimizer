@@ -32,6 +32,7 @@
                     "battery_soc_entity_id": "Battery state of charge",
                     "battery_charge_power_entity_id": "Battery charging power",
                     "battery_phase": "Battery / hybrid inverter phase",
+                    "battery_max_discharge_power": "Battery max discharge power",
                     "raz_time": "Reset counter time"
                 },
                 "data_description": {
@@ -50,6 +51,7 @@
                     "battery_soc_entity_id": "The entity id of the battery state of charge in %. If you don't have battery, keep it empty",
                     "battery_charge_power_entity_id": "The entity id of the battery power net charging rate in watt. It should be negative if battery is charging and positive if battery is discharging. Keep it empty if no solar battery is used.",
                     "battery_phase": "Three-phase only. The phase the battery inverter is connected to, or all phases for a three-phase inverter.",
+                    "battery_max_discharge_power": "Optional. The max discharge power of the battery inverter in W, used by devices allowed to use the battery. If empty, the measured discharge is the limit.",
                     "raz_time": "Time to reset active time counters. Should be before first exposure to sunlight but not too early to allow enough time for night activation"
                 }
             },
@@ -70,6 +72,7 @@
                     "activation_service": "Activation service",
                     "deactivation_service": "Deactivation service",
                     "battery_soc_threshold": "Battery soc threshold",
+                    "battery_policy": "Battery usage",
                     "max_on_time_per_day_min": "Max on time per day",
                     "min_on_time_per_day_min": "Min on time per day",
                     "offpeak_time": "Offpeak time"
@@ -88,6 +91,7 @@
                     "activation_service": "The service to activate the device. Example `switch/turn_on` or `climate/set_hvac_mode/hvac_mode:cool`",
                     "deactivation_service": "The service to deactivate the device. Example `switch/turn_off` or `climate/set_hvac_mode/hvac_mode:off`. Keep it empty if the device will turn off by itself",
                     "battery_soc_threshold": "The battery state of charge threshold to activate the device. Can be a number or a template",
+                    "battery_policy": "How the device may use the solar battery. Battery first: only the surplus left after charging the battery. Load first (default): may take the power charging the battery. Use battery: may also discharge the battery down to the battery threshold. In three-phase, ignored if the device is not on the battery phase.",
                     "max_on_time_per_day_min": "The maximum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time until max time is reached",
                     "min_on_time_per_day_min": "The minimum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time",
                     "offpeak_time": "The offpeak time with format HH:MM"
@@ -116,6 +120,7 @@
                     "change_power_service": "Power change service",
                     "convert_power_divide_factor": "Divide factor",
                     "battery_soc_threshold": "Battery soc threshold",
+                    "battery_policy": "Battery usage",
                     "max_on_time_per_day_min": "Max on time per day",
                     "min_on_time_per_day_min": "Min on time per day",
                     "offpeak_time": "Offpeak time"
@@ -140,6 +145,7 @@
                     "change_power_service": "The service used to change the power. Example `number/set_value`",
                     "convert_power_divide_factor": "The divide factor to convert power into units of the power device. If conversion from power to ampere, the divisor should be 220",
                     "battery_soc_threshold": "The battery state of charge threshold to activate the device. Can be a number or a template",
+                    "battery_policy": "How the device may use the solar battery. Battery first: only the surplus left after charging the battery. Load first (default): may take the power charging the battery. Use battery: may also discharge the battery down to the battery threshold. In three-phase, ignored if the device is not on the battery phase.",
                     "max_on_time_per_day_min": "The maximum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time until max time is reached",
                     "min_on_time_per_day_min": "The minimum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time",
                     "offpeak_time": "The offpeak time with format HH:MM"
@@ -183,6 +189,7 @@
                     "battery_soc_entity_id": "Battery state of charge",
                     "battery_charge_power_entity_id": "Battery charging power",
                     "battery_phase": "Battery / hybrid inverter phase",
+                    "battery_max_discharge_power": "Battery max discharge power",
                     "raz_time": "Reset counter time"
                 },
                 "data_description": {
@@ -201,6 +208,7 @@
                     "battery_soc_entity_id": "The entity id of the battery state of charge in %. If you don't have battery, keep it empty",
                     "battery_charge_power_entity_id": "The entity id of the battery power net charging rate in watt. It should be negative if battery is charging and positive if battery is discharging. Keep it empty if no solar battery is used.",
                     "battery_phase": "Three-phase only. The phase the battery inverter is connected to, or all phases for a three-phase inverter.",
+                    "battery_max_discharge_power": "Optional. The max discharge power of the battery inverter in W, used by devices allowed to use the battery. If empty, the measured discharge is the limit.",
                     "raz_time": "Time to reset active time counters. Should be before first exposure to sunlight but not too early to allow enough time for night activation"
                 }
             },
@@ -221,6 +229,7 @@
                     "activation_service": "Activation service",
                     "deactivation_service": "Deactivation service",
                     "battery_soc_threshold": "Battery soc threshold",
+                    "battery_policy": "Battery usage",
                     "max_on_time_per_day_min": "Max on time per day",
                     "min_on_time_per_day_min": "Min on time per day",
                     "offpeak_time": "Offpeak time"
@@ -239,6 +248,7 @@
                     "activation_service": "The service to activate the device. Example `switch/turn_on` or `climate/set_hvac_mode/hvac_mode:cool`",
                     "deactivation_service": "The service to deactivate the device. Example `switch/turn_off` or `climate/set_hvac_mode/hvac_mode:off`. Keep it empty if the device will turn off by itself",
                     "battery_soc_threshold": "The battery state of charge threshold to activate the device. Can be a number or a template",
+                    "battery_policy": "How the device may use the solar battery. Battery first: only the surplus left after charging the battery. Load first (default): may take the power charging the battery. Use battery: may also discharge the battery down to the battery threshold. In three-phase, ignored if the device is not on the battery phase.",
                     "max_on_time_per_day_min": "The maximum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time until max time is reached",
                     "min_on_time_per_day_min": "The minimum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time",
                     "offpeak_time": "The offpeak time with format HH:MM"
@@ -267,6 +277,7 @@
                     "change_power_service": "Power change service",
                     "convert_power_divide_factor": "Divide factor",
                     "battery_soc_threshold": "Battery soc threshold",
+                    "battery_policy": "Battery usage",
                     "max_on_time_per_day_min": "Max on time per day",
                     "min_on_time_per_day_min": "Min on time per day",
                     "offpeak_time": "Offpeak time"
@@ -291,6 +302,7 @@
                     "change_power_service": "The service used to change the power. Example `number/set_value`",
                     "convert_power_divide_factor": "The divide factor to convert power into units of the power device. If conversion from power to ampere, the divisor should be 220",
                     "battery_soc_threshold": "The battery state of charge threshold to activate the device. Can be a number or a template",
+                    "battery_policy": "How the device may use the solar battery. Battery first: only the surplus left after charging the battery. Load first (default): may take the power charging the battery. Use battery: may also discharge the battery down to the battery threshold. In three-phase, ignored if the device is not on the battery phase.",
                     "max_on_time_per_day_min": "The maximum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time until max time is reached",
                     "min_on_time_per_day_min": "The minimum time per day in state on in minutes. Can be a number or a template. If minium time is not reached during daylight, it will be activated during offpeak time",
                     "offpeak_time": "The offpeak time with format HH:MM"
@@ -328,6 +340,13 @@
                 "2": "Phase 2 (L2)",
                 "3": "Phase 3 (L3)",
                 "all": "Three-phase (L1+L2+L3)"
+            }
+        },
+        "battery_policy": {
+            "options": {
+                "battery_first": "Battery first",
+                "load_first": "Load first",
+                "use_battery": "Use battery"
             }
         }
     }
