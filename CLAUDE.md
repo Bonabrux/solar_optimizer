@@ -5,11 +5,12 @@ sobre esta integración de Home Assistant (fork personal de jmcollin78/solar_opt
 para poder retomar el trabajo con Claude desde otra sesión/dispositivo sin perder contexto.
 
 Repo: `bonabrux/solar_optimizer`
-Rama de trabajo actual: `claude/three-phase` (Fase 3), creada desde la rama del PR #215
-`feature/manual-override-measured-power`, que NO se toca (por si hay que volver a ese código).
+Rama de trabajo actual: **`claude/three-phase`** (Fases 1 a 4 + ajustes de la card).
+Creada desde la rama del PR #215 `feature/manual-override-measured-power`, que NO se toca
+salvo que el maintainer pida cambios en el PR.
 La rama vieja `claude/solar-optimizer-improvements-6ynf06` quedó como histórico (Fases 1-2).
-No se debe abrir Pull Request hasta que el usuario lo pida explícitamente — probar
-todo a fondo primero. Todo el trabajo se pushea a esa rama en el fork.
+NUNCA abrir ni actualizar un Pull Request sin el OK final explícito del usuario
+(mostrarle rama, archivos y texto antes). Todo el trabajo se pushea a la rama de trabajo.
 
 ## Estado del PR (06/10/2026)
 
@@ -26,25 +27,34 @@ ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
 
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
-- **Estado real al día de hoy**: la rama `claude/solar-optimizer-improvements-6ynf06`
-  ya está pusheada a `origin` en GitHub (`git push -u origin ...` confirmado
-  exitoso), con Fase 1 y Fase 2 completas y commiteadas. Todavía **no hay
-  Pull Request abierto**.
-- Si esta sesión es nueva (contenedor efímero recién creado, o PC), la rama YA
-  existe en remoto — no hay que reconstruir nada, solo traerla:
-  ```bash
-  git fetch origin claude/solar-optimizer-improvements-6ynf06
-  git checkout claude/solar-optimizer-improvements-6ynf06
-  ```
+**Estado al 06/10/2026 (fin de sesión):**
+- PR #215 abierto upstream con Fases 1-2 + arreglo de clicks perdidos de la card
+  (commits `ebcb4e5` y `522a185` en `feature/manual-override-measured-power`). Esperando
+  revisión del maintainer.
+- En `claude/three-phase`, implementado y pusheado, **pendiente de prueba real del
+  usuario en su HA**: Fase 3 (trifásico), Fase 4 (uso de batería por dispositivo + ícono
+  en la card), y ajustes de la card (1 decimal, "Desajuste" en W con colores, descripción
+  del umbral de batería; el nombre del campo se mantuvo "Umbral de carga de batería" a
+  pedido del usuario).
+- **Próximo paso:** el usuario prueba en su HA y vuelve con resultados. Después, si está
+  conforme, preparar un PR de Fases 3-4 (rama limpia, apilado sobre #215 o tras su merge)
+  y pedir OK final antes de crearlo.
+
+**Traer el código en otra PC:**
+```bash
+git fetch origin
+git checkout claude/three-phase
+```
+
+**Correr los tests en esta PC (Windows):** usar el Ubuntu de WSL, ver "Estado de los tests".
+Hay un script ad hoc (no commiteado) que compara el algoritmo contra `upstream/main` con la
+misma semilla en 500 escenarios monofásicos: con todos los dispositivos en `load_first`
+los resultados deben ser idénticos. Conviene rehacerlo si se toca el algoritmo.
+
 - Si al pushear aparece un error 403 tipo "Claude doesn't have GitHub access to
-  Bonabrux/solar_optimizer" (ya pasó una vez en esta sesión y el usuario lo
-  resolvió instalando/reconectando la app de Claude en GitHub), pedirle al
-  usuario que repita esa autorización: https://github.com/apps/claude/installations/select_target
-  o reconectar desde https://claude.ai/customize/connectors?auth_start=github&auth_start_force=1
-- Próximo paso real pendiente: el usuario va a probar todo a fondo en su
-  instalación real de HA (tiene previsto ~2 semanas). Hasta que no confirme que
-  quedó conforme, no corresponde tocar Fase 3/4 salvo que lo pida explícitamente,
-  y bajo ningún concepto abrir un PR sin que lo pida.
+  Bonabrux/solar_optimizer", pedirle al usuario que reautorice:
+  https://github.com/apps/claude/installations/select_target
+  o https://claude.ai/customize/connectors?auth_start=github&auth_start_force=1
 
 ## Arquitectura (para orientarse rápido)
 
