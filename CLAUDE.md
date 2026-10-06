@@ -319,6 +319,6 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
   `mismatch` en los datos del coordinator -> atributo `mismatch` del sensor
   `best_objective`. La card muestra "Desajuste" en W con color (verde < 100, naranja
   < 500, rojo) y tooltip. 0 = ideal. El valor del sensor no cambió.
-- Umbral de batería del dispositivo renombrado en las traducciones: "Batería mínima para
-  usar el dispositivo (%)", con descripción clara (0 = sin restricción).
+- Umbral de batería del dispositivo: el usuario pidió mantener el nombre original
+  ("Umbral de carga de batería"); solo se mejoró la descripción (0 = sin restricción).
 - Arreglo de clicks perdidos de la card también está en el PR #215 (commit 522a185).
