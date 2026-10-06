@@ -303,6 +303,9 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
   Con todos en `load_first` no cambia nada: verificado contra `upstream/main` en 500
   escenarios con potencia de batería y límite de descarga (resultados idénticos).
 - SO no controla el inversor: la política decide cuándo prender cada dispositivo.
-- La card no muestra la política (posible mejora).
+- Card: ícono junto al nombre solo para `battery_first` (mdi:battery-charging) y
+  `use_battery` (mdi:battery-arrow-down), con tooltip traducido. Oculto para `load_first`
+  y cuando el atributo `battery_soc` del switch es null (dispositivo fuera de la fase de
+  la batería; también antes del primer cálculo).
 - Tests: `tests/test_battery_policy.py` (10), verificados por mutación.
   Suite: 131 passed, 11 skipped en HA 2026.6.1 y 2026.9.4.
