@@ -38,7 +38,8 @@ const TRANSLATIONS = {
     netConsumption: 'Consommation nette',
     batterySoc: 'SOC Batterie',
     totalOptimized: 'Total Optimisé',
-    algoObjective: 'Objectif Algo',
+    algoObjective: 'Écart',
+    algoObjectiveHelp: 'Puissance mal utilisée (importée ou injectée, pondérée par leur coût). 0 = idéal : toute la production solaire est consommée sans import. Vert < 100 W, orange < 500 W, rouge au-delà.',
     availableNow: 'Disponible immédiatement',
     historyBar: 'Historique d\'activation',
     powerHistory: 'Puissance courante',
@@ -90,7 +91,8 @@ const TRANSLATIONS = {
     netConsumption: 'Net consumption',
     batterySoc: 'Battery SOC',
     totalOptimized: 'Total optimized',
-    algoObjective: 'Algo objective',
+    algoObjective: 'Mismatch',
+    algoObjectiveHelp: 'Power not well used (imported or exported, weighted by their cost). 0 = ideal: all the solar production is consumed without import. Green < 100 W, orange < 500 W, red above.',
     availableNow: 'Available immediately',
     historyBar: 'Activation history',
     powerHistory: 'Current power',
@@ -142,7 +144,8 @@ const TRANSLATIONS = {
     netConsumption: 'Consumo neto',
     batterySoc: 'Carga de batería',
     totalOptimized: 'Total optimizado',
-    algoObjective: 'Objetivo del algoritmo',
+    algoObjective: 'Desajuste',
+    algoObjectiveHelp: 'Potencia mal aprovechada (importada o exportada, ponderada por su costo). 0 = ideal: toda la producción solar se consume sin importar. Verde < 100 W, naranja < 500 W, rojo por encima.',
     availableNow: 'Disponible ahora',
     historyBar: 'Historial de activación',
     powerHistory: 'Potencia',
@@ -566,7 +569,14 @@ class SolarOptimizerCard extends HTMLElement {
     };
 
     // Récupérer les entités centrales
-    const bestObjective = getSoState('best_objective');
+    // Puissances avec 1 décimale (les capteurs peuvent remonter beaucoup de décimales)
+    const fmtW = (v) => isNaN(parseFloat(v)) ? v : parseFloat(v).toFixed(1);
+    // Écart en W (import/export pondérés par leur coût, sans la part priorité) : 0 = idéal
+    const objectiveW = parseFloat(((getSoStateObj('best_objective') || {}).attributes || {}).mismatch);
+    const objectiveColor = isNaN(objectiveW) || objectiveW < 0 ? 'var(--secondary-text-color)'
+      : objectiveW < 100 ? 'var(--success-color, #4caf50)'
+      : objectiveW < 500 ? 'var(--warning-color, #ff9800)'
+      : 'var(--error-color, #f44336)';
     const totalPower = getSoState('total_power');
     const powerProduction = getSoState('power_production');
     const powerConsumption = getSoState('power_consumption');
@@ -854,13 +864,13 @@ class SolarOptimizerCard extends HTMLElement {
         <div class="so-stat-box">
           <ha-icon icon="mdi:solar-power-variant" style="color:var(--warning-color,#ff9800);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('smoothedProduction')}</span>
-          <span class="so-stat-value">${powerProduction} W</span>
+          <span class="so-stat-value">${fmtW(powerProduction)} W</span>
         </div>
         <div class="so-stat-box">
           <ha-icon icon="mdi:home-lightning-bolt" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('netConsumption')}</span>
-          <span class="so-stat-value">${powerConsumption} W</span>
-          ${threePhase ? `<span class="so-stat-title">${['1', '2', '3'].map(p => `${phaseLabel(p)} ${consumptionAttrs['l' + p] ?? 'N/A'}`).join(' · ')} W</span>` : ''}
+          <span class="so-stat-value">${fmtW(powerConsumption)} W</span>
+          ${threePhase ? `<span class="so-stat-title">${['1', '2', '3'].map(p => `${phaseLabel(p)} ${fmtW(consumptionAttrs['l' + p] ?? 'N/A')}`).join(' · ')} W</span>` : ''}
         </div>
         <div class="so-stat-box">
           <ha-icon icon="mdi:battery" style="color:var(--success-color,#4caf50);margin-bottom:4px;"></ha-icon>
@@ -870,12 +880,12 @@ class SolarOptimizerCard extends HTMLElement {
         <div class="so-stat-box">
           <ha-icon icon="mdi:flash" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('totalOptimized')}</span>
-          <span class="so-stat-value">${totalPower} W</span>
+          <span class="so-stat-value">${fmtW(totalPower)} W</span>
         </div>
         <div class="so-stat-box">
           <ha-icon icon="mdi:bullseye-arrow" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
-          <span class="so-stat-title">${t('algoObjective')}</span>
-          <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(3) : bestObjective}</span>
+          <span class="so-stat-title" title="${t('algoObjectiveHelp')}">${t('algoObjective')} ⓘ</span>
+          <span class="so-stat-value" style="color:${objectiveColor};" title="${t('algoObjectiveHelp')}">${!isNaN(objectiveW) ? Math.round(objectiveW) + ' W' : 'N/A'}</span>
         </div>
       </div>
       <div style="display:block;">

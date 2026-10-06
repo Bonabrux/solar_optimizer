@@ -120,6 +120,8 @@ class SolarOptimizerSensorEntity(CoordinatorEntity, SensorEntity):
             return
 
         self._attr_native_value = value
+        if self.idx == "best_objective":
+            self._attr_extra_state_attributes = {"mismatch": self.coordinator.data.get("mismatch")}
         if self.idx == "power_consumption":
             # Three-phase: expose the net consumption of each phase (l1, l2, l3)
             phases = self.coordinator.data.get("power_consumption_phases")

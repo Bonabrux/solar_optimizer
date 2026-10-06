@@ -305,6 +305,8 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
 
         calculated_data["best_solution"] = best_solution
         calculated_data["best_objective"] = best_objective
+        # Readable version of the objective: cost-weighted import + export in W, 0 = ideal
+        calculated_data["mismatch"] = round(self._algo.calculer_desajuste(best_solution), 1) if best_objective >= 0 else None
         calculated_data["total_power"] = total_power
 
         # Uses the result to turn on or off or change power

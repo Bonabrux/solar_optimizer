@@ -409,7 +409,7 @@ Tout changement dans la configuration avancée nécessite un arrêt / relance de
 ## L'appareil "configuration"
 L'intégration, une fois correctement configurée, créée un appareil (device) nommé 'configuration' qui contient plusieurs entités :
 1. un sensor nommé "total_power" qui est le total de toutes les puissances des équipements commandés par Solar Optimizer,
-2. un sensor nommé "best_objective" qui est la valeur de la fonction de coût (cf. fonctionnement de l'algo). Plus la valeur est faible et plus la solution trouvée est bonne,
+2. un sensor nommé "best_objective" qui est la valeur de la fonction de coût (cf. fonctionnement de l'algo). Plus la valeur est faible et plus la solution trouvée est bonne. Son attribut `mismatch` en est une version lisible : la puissance encore importée ou injectée après la solution, en W, pondérée par leur coût et sans la part priorité. 0 est l'idéal,
 3. un sensor nommé "power_production" qui est la dernière valeur de la production solaire lissée (si l'option a été choisie) prise en compte,
 3. un sensor nommé "power_production_brut" qui est la dernière valeur de la production solaire brute prise en compte.
 4. une liste de choix nommé "Priority weight" qui est le poids donné à la gestion de la priorité par rapport à l'optimisation de la consommation solaire. Cf. [la gestion de la priorité](#la-gestion-de-la-priorité)

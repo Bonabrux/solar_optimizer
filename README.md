@@ -430,7 +430,7 @@ The default values are suited for setups with around 20 devices (which results i
 Once the integration is properly configured, a **device** named `'configuration'` is created, containing several entities:
 
 1. A sensor named `total_power`: the total power of all devices controlled by Solar Optimizer.
-2. A sensor named `best_objective`: the cost function value (see algorithm operation). The **lower** the value, the **better** the solution.
+2. A sensor named `best_objective`: the cost function value (see algorithm operation). The **lower** the value, the **better** the solution. Its `mismatch` attribute is a readable version: the power still imported or exported after the solution, in W, weighted by their cost and without the priority part. 0 is ideal.
 3. A sensor named `power_production`: the last **smoothed** solar production value considered (if the option is enabled).
 4. A sensor named `power_production_brut`: the last **raw** solar production value considered.
 5. a dropdown list named `priority weight` which defines the weight given to priority management compared to solar consumption optimization. See [priority management](#priority-management).
@@ -732,7 +732,7 @@ A **Solar Optimizer** header block displays real-time:
 - Net consumed power,
 - Battery SOC (if configured),
 - Total power allocated by the algorithm,
-- Current algorithm objective score.
+- Mismatch: the `mismatch` attribute of `best_objective` in W (0 = ideal), green below 100 W, orange below 500 W, red above.
 
 ## Per-Device Information
 

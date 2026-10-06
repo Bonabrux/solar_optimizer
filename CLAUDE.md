@@ -309,3 +309,16 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
   la batería; también antes del primer cálculo).
 - Tests: `tests/test_battery_policy.py` (10), verificados por mutación.
   Suite: 131 passed, 11 skipped en HA 2026.6.1 y 2026.9.4.
+
+## Ajustes de la card (06/10/2026, en `claude/three-phase`)
+
+- Potencias del resumen (producción, neto, fases, total) con 1 decimal.
+- El "objetivo" (`best_objective`) mezcla W con un término de prioridad escalado por el
+  peso de prioridad, así que no es legible. Nuevo `calculer_desajuste()` en el algoritmo
+  (la parte de import/export ponderada por costo, coeficientes que suman 1 => W) ->
+  `mismatch` en los datos del coordinator -> atributo `mismatch` del sensor
+  `best_objective`. La card muestra "Desajuste" en W con color (verde < 100, naranja
+  < 500, rojo) y tooltip. 0 = ideal. El valor del sensor no cambió.
+- Umbral de batería del dispositivo renombrado en las traducciones: "Batería mínima para
+  usar el dispositivo (%)", con descripción clara (0 = sin restricción).
+- Arreglo de clicks perdidos de la card también está en el PR #215 (commit 522a185).
