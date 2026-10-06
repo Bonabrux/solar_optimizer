@@ -5,7 +5,8 @@ import math
 from datetime import datetime, timedelta, time
 from typing import Any
 
-from homeassistant.core import HomeAssistant, Event, EventStateChangedData
+from homeassistant.core import HomeAssistant, Event, EventStateChangedData, callback
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.components.select import SelectEntity
 
 from homeassistant.helpers.event import (
@@ -62,6 +63,7 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         self._subscribe_to_events: bool = False
         self._unsub_events = None
         self._unsub_raz_override = None
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self._async_cancel_listeners)
         self._sell_cost_entity_id: str = None
         self._buy_cost_entity_id: str = None
         self._sell_tax_percent_entity_id: str = None
@@ -143,6 +145,14 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         )
 
         self._central_config_done = True
+
+    @callback
+    def _async_cancel_listeners(self, _event=None) -> None:
+        """Cancel the time/state listeners when HA stops"""
+        for attr in ("_unsub_events", "_unsub_raz_override"):
+            if (unsub := getattr(self, attr)) is not None:
+                unsub()
+                setattr(self, attr, None)
 
     async def _async_on_raz_time(self, _now=None) -> None:
         """Called each day at raz_time: clears any pending manual override so Solar

@@ -111,14 +111,22 @@ async def async_register_frontend(hass: HomeAssistant) -> None:
                 _LOGGER.warning("Erreur lors du chargement des ressources Lovelace: %s", err)
                 return
 
-        url = "/solar-optimizer-frontend/solar-optimizer-card.js"
+        base_url = "/solar-optimizer-frontend/solar-optimizer-card.js"
+        # Cache-busting : la version change à chaque modification du fichier, ce qui force
+        # le navigateur à recharger la carte au prochain chargement de la page.
+        card_mtime = await hass.async_add_executor_job(os.path.getmtime, os.path.join(frontend_path, "solar-optimizer-card.js"))
+        url = f"{base_url}?v={int(card_mtime)}"
 
         exists = False
         try:
             for entry in resources.async_items():
-                if entry.get("url") == url:
+                entry_url = entry.get("url", "")
+                if entry_url == url:
                     exists = True
-                    break
+                elif entry_url.split("?")[0] == base_url:
+                    _LOGGER.info("Mise à jour de la ressource Lovelace Solar Optimizer Card : %s -> %s", entry_url, url)
+                    await resources.async_update_item(entry["id"], {"res_type": "module", "url": url})
+                    exists = True
         except Exception as err:
             _LOGGER.warning("Erreur lors de la lecture des ressources Lovelace: %s", err)
             return

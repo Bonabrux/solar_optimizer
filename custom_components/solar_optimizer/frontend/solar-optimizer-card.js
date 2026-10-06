@@ -520,7 +520,10 @@ class SolarOptimizerCard extends HTMLElement {
       const powerMax = attrs.power_max || 0;
       // Si l'équipement est éteint, on force la puissance affichée à 0
       // pour éviter qu'une valeur résiduelle dans les attributs ne remplisse la barre
-      const currentPower = isActive ? (attrs.current_power || 0) : 0;
+      // Capteur de puissance mesurée (optionnel, affichage seulement) : prioritaire sur l'estimation
+      const measuredId = attrs.measured_power_entity_id || null;
+      const measuredPower = measuredId ? this._powerW(this._hass.states[measuredId]) : null;
+      const currentPower = measuredPower != null ? Math.round(measuredPower) : (isActive ? (attrs.current_power || 0) : 0);
       const requestedPower = attrs.requested_power || 0;
 
       // Priorité
@@ -716,7 +719,7 @@ class SolarOptimizerCard extends HTMLElement {
             <div style="display:flex; gap:12px; align-items:flex-start; margin-top:6px;">
               <div style="flex:1; min-width:0;">
                 ${this._renderHistoryBar(switchKey, t)}
-                ${attrs.can_change_power ? this._renderPowerHistoryGraph(switchKey, powerMax, t) : ''}
+                ${(attrs.can_change_power || measuredId) ? this._renderPowerHistoryGraph(measuredId || switchKey, powerMax, t, !!measuredId) : ''}
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
                 <button
@@ -1006,14 +1009,23 @@ class SolarOptimizerCard extends HTMLElement {
     this.updateCard();
   }
 
-  _renderPowerHistoryGraph(entityId, powerMax, t) {
+  // Valeur en W d'un état de capteur (gère kW), null si indisponible
+  _powerW(stateObj, attrs) {
+    if (!stateObj) return null;
+    const v = parseFloat(stateObj.state);
+    if (isNaN(v)) return null;
+    const unit = (attrs || stateObj.attributes || {}).unit_of_measurement;
+    return unit === 'kW' ? v * 1000 : v;
+  }
+
+  _renderPowerHistoryGraph(entityId, powerMax, t, measured = false) {
     const CACHE_TTL = 5 * 60 * 1000;
     if (!this._powerHistoryCache) this._powerHistoryCache = {};
     if (!this._fetchingPowerHistory) this._fetchingPowerHistory = new Set();
     const historyHours = (this._config && this._config.history_hours) ? this._config.history_hours : 24;
     const cached = this._powerHistoryCache[entityId];
     const label = `${t('powerHistory')} – ${historyHours}h`;
-    const pMax = powerMax > 0 ? powerMax : 1;
+    let pMax = powerMax > 0 ? powerMax : 1;
 
     const emptyGraph = `
       <div class="so-history-bar-wrapper" style="margin-top:4px;">
@@ -1034,11 +1046,19 @@ class SolarOptimizerCard extends HTMLElement {
     const { data, startTime, endTime } = cached;
     const totalMs = endTime.getTime() - startTime.getTime();
 
-    const sorted = [...(data || [])]
+    // Mesuré : valeur = état du capteur ; sinon attribut current_power du switch
+    let lastAttrs = {};
+    const points = [...(data || [])]
       .sort((a, b) => new Date(a.last_changed) - new Date(b.last_changed))
-      .filter(s => s.attributes && s.attributes.current_power != null);
+      .map(s => {
+        if (s.attributes) lastAttrs = s.attributes;
+        const p = measured ? this._powerW(s, lastAttrs) : (s.attributes ? parseFloat(s.attributes.current_power) : NaN);
+        return { tMs: new Date(s.last_changed).getTime(), p };
+      })
+      .filter(pt => pt.p != null && !isNaN(pt.p));
 
-    if (sorted.length === 0) return emptyGraph;
+    if (points.length === 0) return emptyGraph;
+    pMax = Math.max(pMax, ...points.map(pt => pt.p));
 
     const toPoint = (tMs, power) => {
       const x = ((tMs - startTime.getTime()) / totalMs) * 100;
@@ -1046,11 +1066,13 @@ class SolarOptimizerCard extends HTMLElement {
       return `${x.toFixed(2)},${y.toFixed(2)}`;
     };
 
-    const linePoints = sorted.map(s =>
-      toPoint(new Date(s.last_changed).getTime(), s.attributes.current_power)
-    );
-    const lastPower = sorted[sorted.length - 1].attributes.current_power;
-    linePoints.push(toPoint(endTime.getTime(), lastPower));
+    const linePoints = points.map(pt => toPoint(pt.tMs, pt.p));
+    linePoints.push(toPoint(endTime.getTime(), points[points.length - 1].p));
+    // Ligne pointillée = puissance configurée (budget de l'algorithme), pour comparer au réel
+    const budgetY = (30 - (powerMax / pMax) * 28).toFixed(2);
+    const budgetLine = (measured && powerMax > 0)
+      ? `<line x1="0" y1="${budgetY}" x2="100" y2="${budgetY}" stroke="var(--secondary-text-color)" stroke-width="1" stroke-dasharray="3,3" vector-effect="non-scaling-stroke" />`
+      : '';
 
     const polylinePoints = linePoints.join(' ');
     const polygonPoints = `0,30 ${linePoints.join(' ')} 100,30`;
@@ -1060,6 +1082,7 @@ class SolarOptimizerCard extends HTMLElement {
         <svg class="so-power-history-svg" viewBox="0 0 100 30" preserveAspectRatio="none">
           <polygon points="${polygonPoints}" fill="var(--primary-color)" fill-opacity="0.2" />
           <polyline points="${polylinePoints}" fill="none" stroke="var(--primary-color)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+          ${budgetLine}
         </svg>
         <div class="so-history-bar-label">${label}</div>
       </div>`;

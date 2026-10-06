@@ -167,7 +167,7 @@ el algoritmo.
 ## Estado de los tests
 
 Este entorno sandbox no tiene Python 3.14 (que es lo que pide
-`homeassistant==2026.6.1`, la versión pinneada en `requirements_dev.txt`). Python
+`homeassistant`, pinneado en `requirements_dev.txt` (2026.9.4 desde el 06/10/2026)). Python
 3.13 sí está disponible, y con eso pip resuelve `homeassistant==2026.2.3`
 (la última compatible con 3.13). Con esa versión corre bien:
 
@@ -187,11 +187,47 @@ necesitaron un ajuste menor: agregar `context=ANY` a las llamadas mockeadas de
 Si en la PC usás Python 3.14 con la versión pinneada exacta, no debería haber
 diferencias de comportamiento relevantes para estos tests.
 
+### En la PC Windows del usuario
+
+HA no corre nativo en Windows (`fcntl`). Usar el Ubuntu de WSL, que ya tiene `uv` y
+`python3.14`. Copiar el repo a `~/so-test` (correr desde `/mnt/c` sobre OneDrive es lento):
+
+```bash
+cd ~/so-test && uv venv -p 3.14 .venv
+uv pip install -p .venv homeassistant==2026.6.1 pytest-homeassistant-custom-component pytest-asyncio
+.venv/bin/python -m pytest tests/ -q -p no:cacheprovider
+```
+
+Resultado (06/10/2026): 109 passed, 11 skipped tanto con 2026.6.1 como con
+**2026.9.4** (la versión que corre el usuario en su HA). Para 2026.9 hubo que adaptar
+2 tests: `input_number.async_set_value` ya no funciona (se usa el servicio
+`input_number.set_value`), y el listener de estado ahora corre durante
+`async_turn_on` (fijar `now` antes de encender). El plugin nuevo falla por
+"Lingering timer" si un listener no se cancela al parar HA: el coordinator ahora
+cancela `_unsub_events`/`_unsub_raz_override` en `EVENT_HOMEASSISTANT_STOP`.
+
+## Ajustes tras la primera prueba real (06/10/2026)
+
+El usuario copió la rama a su HA y no vio cambios. Diagnóstico y correcciones:
+
+- **Card cacheada (seguía mostrando €)**: el recurso Lovelace tenía URL fija. Ahora
+  `__init__.py` la registra como `...solar-optimizer-card.js?v=<mtime del archivo>` y
+  actualiza la entrada existente, así cada cambio del JS fuerza recarga. Si aun así
+  sigue el €, revisar si hay otro recurso duplicado de la card en
+  Ajustes > Paneles > Recursos (p. ej. instalado por HACS/`/local/`).
+- **Fase 1 punto 2 estaba incompleto**: `power_entity_id` solo existe en dispositivos
+  de potencia variable y es la entidad de *comando* (number), no de medición. Nuevo
+  campo opcional `measured_power_entity_id` (sensor, device_class power, W o kW) en
+  ambos tipos de dispositivo. **Solo visual**: la card lo usa para el número, la
+  barra y el gráfico de potencia (que ahora también aparece en on/off), con línea
+  punteada en `power_max` para comparar presupuesto vs real. El algoritmo NO lo usa:
+  el usuario quiere que siga usando su `power_max` como presupuesto.
+
 ## Pendiente / próximos pasos sugeridos
 
 1. ~~Confirmar que la suite completa de tests pasa~~ — ya confirmado (109 passed,
    11 skipped, 0 failed) y ya pusheado a `origin/claude/solar-optimizer-improvements-6ynf06`.
-2. **Esto es lo que falta ahora**: el usuario prueba todo a fondo en su instalación
+2. **Esto es lo que falta ahora** (incluye los ajustes del 06/10): el usuario prueba todo a fondo en su instalación
    real de HA (dispositivo real con `power_entity_id`, override manual desde la
    card y desde el dispositivo subyacente, servicio `clear_override`, el
    binary_sensor de override, y que el historial/logbook muestre la atribución).

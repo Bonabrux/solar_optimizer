@@ -153,6 +153,8 @@ class ManagedDevice:
         self._unique_id = name_to_unique_id(self._name)
         self._entity_id = device_config.get("entity_id")
         self._power_entity_id = device_config.get("power_entity_id")
+        # Display-only: real consumption sensor shown in the card, never used by the algorithm
+        self._measured_power_entity_id = device_config.get("measured_power_entity_id")
         self._power_max = convert_to_template_or_value(hass, device_config.get("power_max"))
 
         self._power_min = (
@@ -721,6 +723,11 @@ class ManagedDevice:
     def entity_id(self) -> str:
         """The entity_id of the device"""
         return self._entity_id
+
+    @property
+    def measured_power_entity_id(self) -> str | None:
+        """The sensor measuring the real consumption of the device (display only)"""
+        return self._measured_power_entity_id
 
     @property
     def power_entity_id(self) -> str:

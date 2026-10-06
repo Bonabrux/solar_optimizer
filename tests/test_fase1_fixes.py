@@ -102,7 +102,7 @@ async def test_power_entity_id_used_when_cannot_change_power(
     )
 
     await fake_switch.async_turn_on()
-    await fake_power.async_set_value(560)
+    await hass.services.async_call("input_number", "set_value", {"entity_id": fake_power.entity_id, "value": 560}, blocking=True)
     await hass.async_block_till_done()
 
     device.set_current_power_with_device_state()
