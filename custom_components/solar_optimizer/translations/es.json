@@ -20,6 +20,10 @@
                     "refresh_period_sec": "Período de actualización",
                     "power_consumption_entity_id": "Consumo neto de potencia",
                     "power_production_entity_id": "Producción solar",
+                    "phase_mode": "Tipo de instalación",
+                    "power_consumption_l1_entity_id": "Consumo neto fase 1",
+                    "power_consumption_l2_entity_id": "Consumo neto fase 2",
+                    "power_consumption_l3_entity_id": "Consumo neto fase 3",
                     "subscribe_to_events": "Recalcular con cada nuevo valor de producción/consumo",
                     "sell_cost_entity_id": "Precio de venta de la energía",
                     "buy_cost_entity_id": "Precio de compra de la energía",
@@ -27,12 +31,17 @@
                     "smooth_production": "Suavizar la producción solar",
                     "battery_soc_entity_id": "Estado de carga de la batería",
                     "battery_charge_power_entity_id": "Potencia de carga de la batería",
+                    "battery_phase": "Fase de la batería / inversor híbrido",
                     "raz_time": "Hora de reinicio de contadores"
                 },
                 "data_description": {
                     "refresh_period_sec": "Aunque no haya datos nuevos, recalcular al menos con este período en segundos. Atención: en cada período se hacen cálculos pesados, vigile la carga de CPU y no actualice con demasiada frecuencia",
                     "power_consumption_entity_id": "El entity_id del sensor de consumo neto. Debe ser negativo cuando se exporta energía a la red.",
                     "power_production_entity_id": "El entity_id del sensor de producción solar.",
+                    "phase_mode": "Monofásica (por defecto) o trifásica. En trifásica, cada dispositivo se optimiza según el consumo neto de su propia fase.",
+                    "power_consumption_l1_entity_id": "Solo trifásica. El entity_id del consumo neto de la fase 1 (L1). Negativo cuando se exporta energía a la red.",
+                    "power_consumption_l2_entity_id": "Solo trifásica. El entity_id del consumo neto de la fase 2 (L2). Negativo cuando se exporta energía a la red.",
+                    "power_consumption_l3_entity_id": "Solo trifásica. El entity_id del consumo neto de la fase 3 (L3). Negativo cuando se exporta energía a la red.",
                     "subscribe_to_events": "Suscribirse a los eventos para recalcular apenas haya datos nuevos. Vigile la carga de CPU.",
                     "sell_cost_entity_id": "El entity_id con el precio actual de venta de la energía.",
                     "buy_cost_entity_id": "El entity_id con el precio actual de compra de la energía.",
@@ -40,6 +49,7 @@
                     "smooth_production": "Si está marcado, la producción solar se suaviza para evitar variaciones bruscas",
                     "battery_soc_entity_id": "El entity_id del estado de carga de la batería en %. Déjelo vacío si no tiene batería",
                     "battery_charge_power_entity_id": "El entity_id de la potencia neta de carga de la batería en W. Debe ser negativa cuando la batería carga y positiva cuando descarga. Déjelo vacío si no usa batería solar.",
+                    "battery_phase": "Solo trifásica. La fase a la que está conectado el inversor de la batería, o todas las fases si el inversor es trifásico.",
                     "raz_time": "Hora de reinicio de los contadores de tiempo encendido. Debe ser antes de la primera exposición al sol, pero no demasiado temprano para dejar tiempo a la activación nocturna"
                 }
             },
@@ -52,6 +62,7 @@
                     "power_max": "Potencia del dispositivo",
                     "measured_power_entity_id": "Sensor de potencia medida",
                     "active_switch_is_override": "Considerar el switch Active como override manual",
+                    "phase": "Fase",
                     "check_usable_template": "Plantilla de disponibilidad",
                     "check_active_template": "Plantilla de actividad",
                     "duration_min": "Duración mínima encendido",
@@ -71,6 +82,7 @@
                     "power_max": "La potencia del dispositivo encendido. Puede ser un número o una plantilla",
                     "measured_power_entity_id": "Opcional. Sensor que mide el consumo real del dispositivo en W o kW (p. ej. un enchufe inteligente). Solo se usa para mostrar el consumo real en la tarjeta: el algoritmo sigue usando la potencia configurada como presupuesto.",
                     "active_switch_is_override": "Solo se usa con el switch 'Respetar cambios manuales' encendido. Marcado: prender o apagar el switch 'Active' de Solar Optimizer se respeta como override manual. Sin marcar (por defecto): es una orden simple que el algoritmo puede revertir en su próxima decisión. Un cambio hecho directamente en el dispositivo siempre se respeta como override.",
+                    "phase": "Solo trifásica. La fase a la que está conectado el dispositivo, o trifásica para una carga conectada a las 3 fases (su potencia se reparte en partes iguales). Se ignora en monofásica.",
                     "check_usable_template": "La plantilla que indica si el dispositivo se puede usar. Ejemplo `True` o `states('sensor.mi_sensor') | float > 10` (no olvide las llaves dobles)",
                     "check_active_template": "La plantilla que indica si el dispositivo está activo. Déjela vacía para dispositivos tipo switch o similares. Ejemplo `is_state_attr('sensor.mi_sensor', 'hvac_mode', 'heat')` (con llaves dobles)",
                     "duration_min": "La duración mínima encendido, en minutos",
@@ -104,6 +116,7 @@
                     "power_entity_id": "Entidad de potencia",
                     "measured_power_entity_id": "Sensor de potencia medida",
                     "active_switch_is_override": "Considerar el switch Active como override manual",
+                    "phase": "Fase",
                     "duration_power_min": "Duración de cambio de potencia",
                     "change_power_service": "Servicio de cambio de potencia",
                     "convert_power_divide_factor": "Factor de división",
@@ -130,6 +143,7 @@
                     "power_entity_id": "La entidad que controla la potencia",
                     "measured_power_entity_id": "Opcional. Sensor que mide el consumo real del dispositivo en W o kW (p. ej. un enchufe inteligente). Solo se usa para mostrar el consumo real en la tarjeta: el algoritmo sigue usando la potencia configurada como presupuesto.",
                     "active_switch_is_override": "Solo se usa con el switch 'Respetar cambios manuales' encendido. Marcado: prender o apagar el switch 'Active' de Solar Optimizer se respeta como override manual. Sin marcar (por defecto): es una orden simple que el algoritmo puede revertir en su próxima decisión. Un cambio hecho directamente en el dispositivo siempre se respeta como override.",
+                    "phase": "Solo trifásica. La fase a la que está conectado el dispositivo, o trifásica para una carga conectada a las 3 fases (su potencia se reparte en partes iguales). Se ignora en monofásica.",
                     "duration_power_min": "La duración mínima de cada cambio de potencia, en minutos",
                     "change_power_service": "El servicio para cambiar la potencia. Ejemplo `number/set_value`",
                     "convert_power_divide_factor": "El factor de división para convertir la potencia a las unidades del dispositivo. Para convertir W a amperes, el divisor debería ser 220",
@@ -145,7 +159,8 @@
         "error": {
             "format_time_invalid": "El formato de la hora debe ser HH:MM",
             "invalid_value": "El valor no es válido o no es compatible con los límites del dispositivo",
-            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día"
+            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día",
+            "phase_entity_required": "En trifásica son obligatorias las tres entidades de consumo por fase"
         }
     },
     "options": {
@@ -168,6 +183,10 @@
                     "refresh_period_sec": "Período de actualización",
                     "power_consumption_entity_id": "Consumo neto de potencia",
                     "power_production_entity_id": "Producción solar",
+                    "phase_mode": "Tipo de instalación",
+                    "power_consumption_l1_entity_id": "Consumo neto fase 1",
+                    "power_consumption_l2_entity_id": "Consumo neto fase 2",
+                    "power_consumption_l3_entity_id": "Consumo neto fase 3",
                     "subscribe_to_events": "Recalcular con cada nuevo valor de producción/consumo",
                     "sell_cost_entity_id": "Precio de venta de la energía",
                     "buy_cost_entity_id": "Precio de compra de la energía",
@@ -175,12 +194,17 @@
                     "smooth_production": "Suavizar la producción solar",
                     "battery_soc_entity_id": "Estado de carga de la batería",
                     "battery_charge_power_entity_id": "Potencia de carga de la batería",
+                    "battery_phase": "Fase de la batería / inversor híbrido",
                     "raz_time": "Hora de reinicio de contadores"
                 },
                 "data_description": {
                     "refresh_period_sec": "Aunque no haya datos nuevos, recalcular al menos con este período en segundos. Atención: en cada período se hacen cálculos pesados, vigile la carga de CPU y no actualice con demasiada frecuencia",
                     "power_consumption_entity_id": "El entity_id del sensor de consumo neto. Debe ser negativo cuando se exporta energía a la red.",
                     "power_production_entity_id": "El entity_id del sensor de producción solar.",
+                    "phase_mode": "Monofásica (por defecto) o trifásica. En trifásica, cada dispositivo se optimiza según el consumo neto de su propia fase.",
+                    "power_consumption_l1_entity_id": "Solo trifásica. El entity_id del consumo neto de la fase 1 (L1). Negativo cuando se exporta energía a la red.",
+                    "power_consumption_l2_entity_id": "Solo trifásica. El entity_id del consumo neto de la fase 2 (L2). Negativo cuando se exporta energía a la red.",
+                    "power_consumption_l3_entity_id": "Solo trifásica. El entity_id del consumo neto de la fase 3 (L3). Negativo cuando se exporta energía a la red.",
                     "subscribe_to_events": "Suscribirse a los eventos para recalcular apenas haya datos nuevos. Vigile la carga de CPU.",
                     "sell_cost_entity_id": "El entity_id con el precio actual de venta de la energía.",
                     "buy_cost_entity_id": "El entity_id con el precio actual de compra de la energía.",
@@ -188,6 +212,7 @@
                     "smooth_production": "Si está marcado, la producción solar se suaviza para evitar variaciones bruscas",
                     "battery_soc_entity_id": "El entity_id del estado de carga de la batería en %. Déjelo vacío si no tiene batería",
                     "battery_charge_power_entity_id": "El entity_id de la potencia neta de carga de la batería en W. Debe ser negativa cuando la batería carga y positiva cuando descarga. Déjelo vacío si no usa batería solar.",
+                    "battery_phase": "Solo trifásica. La fase a la que está conectado el inversor de la batería, o todas las fases si el inversor es trifásico.",
                     "raz_time": "Hora de reinicio de los contadores de tiempo encendido. Debe ser antes de la primera exposición al sol, pero no demasiado temprano para dejar tiempo a la activación nocturna"
                 }
             },
@@ -200,6 +225,7 @@
                     "power_max": "Potencia del dispositivo",
                     "measured_power_entity_id": "Sensor de potencia medida",
                     "active_switch_is_override": "Considerar el switch Active como override manual",
+                    "phase": "Fase",
                     "check_usable_template": "Plantilla de disponibilidad",
                     "check_active_template": "Plantilla de actividad",
                     "duration_min": "Duración mínima encendido",
@@ -219,6 +245,7 @@
                     "power_max": "La potencia del dispositivo encendido. Puede ser un número o una plantilla",
                     "measured_power_entity_id": "Opcional. Sensor que mide el consumo real del dispositivo en W o kW (p. ej. un enchufe inteligente). Solo se usa para mostrar el consumo real en la tarjeta: el algoritmo sigue usando la potencia configurada como presupuesto.",
                     "active_switch_is_override": "Solo se usa con el switch 'Respetar cambios manuales' encendido. Marcado: prender o apagar el switch 'Active' de Solar Optimizer se respeta como override manual. Sin marcar (por defecto): es una orden simple que el algoritmo puede revertir en su próxima decisión. Un cambio hecho directamente en el dispositivo siempre se respeta como override.",
+                    "phase": "Solo trifásica. La fase a la que está conectado el dispositivo, o trifásica para una carga conectada a las 3 fases (su potencia se reparte en partes iguales). Se ignora en monofásica.",
                     "check_usable_template": "La plantilla que indica si el dispositivo se puede usar. Ejemplo `True` o `states('sensor.mi_sensor') | float > 10` (no olvide las llaves dobles)",
                     "check_active_template": "La plantilla que indica si el dispositivo está activo. Déjela vacía para dispositivos tipo switch o similares. Ejemplo `is_state_attr('sensor.mi_sensor', 'hvac_mode', 'heat')` (con llaves dobles)",
                     "duration_min": "La duración mínima encendido, en minutos",
@@ -252,6 +279,7 @@
                     "power_entity_id": "Entidad de potencia",
                     "measured_power_entity_id": "Sensor de potencia medida",
                     "active_switch_is_override": "Considerar el switch Active como override manual",
+                    "phase": "Fase",
                     "duration_power_min": "Duración de cambio de potencia",
                     "change_power_service": "Servicio de cambio de potencia",
                     "convert_power_divide_factor": "Factor de división",
@@ -278,6 +306,7 @@
                     "power_entity_id": "La entidad que controla la potencia",
                     "measured_power_entity_id": "Opcional. Sensor que mide el consumo real del dispositivo en W o kW (p. ej. un enchufe inteligente). Solo se usa para mostrar el consumo real en la tarjeta: el algoritmo sigue usando la potencia configurada como presupuesto.",
                     "active_switch_is_override": "Solo se usa con el switch 'Respetar cambios manuales' encendido. Marcado: prender o apagar el switch 'Active' de Solar Optimizer se respeta como override manual. Sin marcar (por defecto): es una orden simple que el algoritmo puede revertir en su próxima decisión. Un cambio hecho directamente en el dispositivo siempre se respeta como override.",
+                    "phase": "Solo trifásica. La fase a la que está conectado el dispositivo, o trifásica para una carga conectada a las 3 fases (su potencia se reparte en partes iguales). Se ignora en monofásica.",
                     "duration_power_min": "La duración mínima de cada cambio de potencia, en minutos",
                     "change_power_service": "El servicio para cambiar la potencia. Ejemplo `number/set_value`",
                     "convert_power_divide_factor": "El factor de división para convertir la potencia a las unidades del dispositivo. Para convertir W a amperes, el divisor debería ser 220",
@@ -293,7 +322,8 @@
         "error": {
             "format_time_invalid": "El formato de la hora debe ser HH:MM",
             "invalid_value": "El valor no es válido o no es compatible con los límites del dispositivo",
-            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día"
+            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día",
+            "phase_entity_required": "En trifásica son obligatorias las tres entidades de consumo por fase"
         }
     },
     "selector": {
@@ -308,6 +338,20 @@
             "options": {
                 "action_call": "Llamada a acción",
                 "event": "Evento"
+            }
+        },
+        "phase_mode": {
+            "options": {
+                "single_phase": "Monofásica",
+                "three_phase": "Trifásica"
+            }
+        },
+        "phase": {
+            "options": {
+                "1": "Fase 1 (L1)",
+                "2": "Fase 2 (L2)",
+                "3": "Fase 3 (L3)",
+                "all": "Trifásica (L1+L2+L3)"
             }
         }
     },

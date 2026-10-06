@@ -20,6 +20,10 @@
                     "refresh_period_sec": "Refresh period",
                     "power_consumption_entity_id": "Net power consumption",
                     "power_production_entity_id": "Solar power production",
+                    "phase_mode": "Installation type",
+                    "power_consumption_l1_entity_id": "Net consumption phase 1",
+                    "power_consumption_l2_entity_id": "Net consumption phase 2",
+                    "power_consumption_l3_entity_id": "Net consumption phase 3",
                     "subscribe_to_events": "Recalculate with every new Production/Consumption Value",
                     "sell_cost_entity_id": "Energy sell price",
                     "buy_cost_entity_id": "Energy buy price",
@@ -27,12 +31,17 @@
                     "smooth_production": "Smooth the solar production",
                     "battery_soc_entity_id": "Battery state of charge",
                     "battery_charge_power_entity_id": "Battery charging power",
+                    "battery_phase": "Battery / hybrid inverter phase",
                     "raz_time": "Reset counter time"
                 },
                 "data_description": {
                     "refresh_period_sec": "Even with no new data, refresh at least in with this period in seconds. Warning heavy calculations are done at each period, so keep an eye on the CPU load. Don't refresh to often",
                     "power_consumption_entity_id": "The entity_id of the net power consumption sensor. Net power should be negative if power is exported to grid.",
                     "power_production_entity_id": "The entity_id of the solar power production sensor.",
+                    "phase_mode": "Single-phase (default) or three-phase. In three-phase, each device is optimized against the net consumption of its own phase.",
+                    "power_consumption_l1_entity_id": "Three-phase only. The entity_id of the net power consumption of phase 1 (L1). Negative if power is exported to grid.",
+                    "power_consumption_l2_entity_id": "Three-phase only. The entity_id of the net power consumption of phase 2 (L2). Negative if power is exported to grid.",
+                    "power_consumption_l3_entity_id": "Three-phase only. The entity_id of the net power consumption of phase 3 (L3). Negative if power is exported to grid.",
                     "subscribe_to_events": "Subscribe to events to recalculate with new data, as soon as they are avalaible. Keep an eye on the CPU load.",
                     "sell_cost_entity_id": "The entity_id which holds the current energy sell price.",
                     "buy_cost_entity_id": "The entity_id which holds the current energy buy price.",
@@ -40,6 +49,7 @@
                     "smooth_production": "If checked, the solar production will be smoothed to avoid hard variation",
                     "battery_soc_entity_id": "The entity id of the battery state of charge in %. If you don't have battery, keep it empty",
                     "battery_charge_power_entity_id": "The entity id of the battery power net charging rate in watt. It should be negative if battery is charging and positive if battery is discharging. Keep it empty if no solar battery is used.",
+                    "battery_phase": "Three-phase only. The phase the battery inverter is connected to, or all phases for a three-phase inverter.",
                     "raz_time": "Time to reset active time counters. Should be before first exposure to sunlight but not too early to allow enough time for night activation"
                 }
             },
@@ -52,6 +62,7 @@
                     "power_max": "Device power",
                     "measured_power_entity_id": "Measured power sensor",
                     "active_switch_is_override": "Consider Active switch action as override",
+                    "phase": "Phase",
                     "check_usable_template": "Usable template",
                     "check_active_template": "Active template",
                     "duration_min": "Duration min",
@@ -71,6 +82,7 @@
                     "power_max": "The power of the device when activated. Can be a number or a template",
                     "measured_power_entity_id": "Optional. Sensor measuring the real consumption of the device in W or kW (e.g. a smart plug). Only used to display the real consumption in the card: the algorithm keeps using the configured power as its budget.",
                     "active_switch_is_override": "Only used when the 'Respect manual changes' switch is on. Checked: turning the Solar Optimizer 'Active' switch on or off is respected as a manual override. Unchecked (default): it is a plain command the algorithm may revert at its next decision. A change made on the device itself is always respected as an override.",
+                    "phase": "Three-phase only. The phase the device is connected to, or three-phase for a load connected to the 3 phases (its power is split evenly). Ignored in single-phase.",
                     "check_usable_template": "The template to check if the device is usable. Example `True ` or `states('sensor.my_sensor') | float > 10` (don't forgeet double accolades)",
                     "check_active_template": "The template to check if the device is active. Keep it empty for switch type device or apparented. Example `is_state_attr('sensor.my_sensor', 'hvac_mode', 'heat')` (with double accolades)",
                     "duration_min": "The minimum duration of the device when turned on in minutes",
@@ -104,6 +116,7 @@
                     "power_entity_id": "Power entity id",
                     "measured_power_entity_id": "Measured power sensor",
                     "active_switch_is_override": "Consider Active switch action as override",
+                    "phase": "Phase",
                     "duration_power_min": "Duration of power change",
                     "change_power_service": "Power change service",
                     "convert_power_divide_factor": "Divide factor",
@@ -130,6 +143,7 @@
                     "power_entity_id": "The entity id of the power sensor",
                     "measured_power_entity_id": "Optional. Sensor measuring the real consumption of the device in W or kW (e.g. a smart plug). Only used to display the real consumption in the card: the algorithm keeps using the configured power as its budget.",
                     "active_switch_is_override": "Only used when the 'Respect manual changes' switch is on. Checked: turning the Solar Optimizer 'Active' switch on or off is respected as a manual override. Unchecked (default): it is a plain command the algorithm may revert at its next decision. A change made on the device itself is always respected as an override.",
+                    "phase": "Three-phase only. The phase the device is connected to, or three-phase for a load connected to the 3 phases (its power is split evenly). Ignored in single-phase.",
                     "duration_power_min": "The minimal duration of each power change in minutes",
                     "change_power_service": "The service used to change the power. Example `number/set_value`",
                     "convert_power_divide_factor": "The divide factor to convert power into units of the power device. If conversion from power to ampere, the divisor should be 220",
@@ -145,7 +159,8 @@
         "error": {
             "format_time_invalid": "Format of time should be HH:MM",
             "invalid_value": "The value is invalid or incompatible with the device limits",
-            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations"
+            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations",
+            "phase_entity_required": "All three phase consumption entities are required in three-phase mode"
         }
     },
     "options": {
@@ -168,6 +183,10 @@
                     "refresh_period_sec": "Refresh period",
                     "power_consumption_entity_id": "Net power consumption",
                     "power_production_entity_id": "Solar power production",
+                    "phase_mode": "Installation type",
+                    "power_consumption_l1_entity_id": "Net consumption phase 1",
+                    "power_consumption_l2_entity_id": "Net consumption phase 2",
+                    "power_consumption_l3_entity_id": "Net consumption phase 3",
                     "subscribe_to_events": "Recalculate with every new Production/Consumption Value",
                     "sell_cost_entity_id": "Energy sell price",
                     "buy_cost_entity_id": "Energy buy price",
@@ -175,12 +194,17 @@
                     "smooth_production": "Smooth the solar production",
                     "battery_soc_entity_id": "Battery state of charge",
                     "battery_charge_power_entity_id": "Battery charging power",
+                    "battery_phase": "Battery / hybrid inverter phase",
                     "raz_time": "Reset counter time"
                 },
                 "data_description": {
                     "refresh_period_sec": "Even with no new data, refresh at least in with this period in seconds. Warning heavy calculations are done at each period, so keep an eye on the CPU load. Don't refresh to often",
                     "power_consumption_entity_id": "the entity_id of the net power consumption sensor. Net power should be negative if power is exported to grid.",
                     "power_production_entity_id": "the entity_id of the solar power production sensor.",
+                    "phase_mode": "Single-phase (default) or three-phase. In three-phase, each device is optimized against the net consumption of its own phase.",
+                    "power_consumption_l1_entity_id": "Three-phase only. The entity_id of the net power consumption of phase 1 (L1). Negative if power is exported to grid.",
+                    "power_consumption_l2_entity_id": "Three-phase only. The entity_id of the net power consumption of phase 2 (L2). Negative if power is exported to grid.",
+                    "power_consumption_l3_entity_id": "Three-phase only. The entity_id of the net power consumption of phase 3 (L3). Negative if power is exported to grid.",
                     "subscribe_to_events": "Subscribe to events to recalculate with new data, as soon as they are avalaible. Keep an eye on the CPU load.",
                     "sell_cost_entity_id": "The entity_id which holds the current energy sell price.",
                     "buy_cost_entity_id": "The entity_id which holds the current energy buy price.",
@@ -188,6 +212,7 @@
                     "smooth_production": "If checked, the solar production will be smoothed to avoid hard variation",
                     "battery_soc_entity_id": "The entity id of the battery state of charge in %. If you don't have battery, keep it empty",
                     "battery_charge_power_entity_id": "The entity id of the battery power net charging rate in watt. It should be negative if battery is charging and positive if battery is discharging. Keep it empty if no solar battery is used.",
+                    "battery_phase": "Three-phase only. The phase the battery inverter is connected to, or all phases for a three-phase inverter.",
                     "raz_time": "Time to reset active time counters. Should be before first exposure to sunlight but not too early to allow enough time for night activation"
                 }
             },
@@ -200,6 +225,7 @@
                     "power_max": "Device power",
                     "measured_power_entity_id": "Measured power sensor",
                     "active_switch_is_override": "Consider Active switch action as override",
+                    "phase": "Phase",
                     "check_usable_template": "Usable template",
                     "check_active_template": "Active template",
                     "duration_min": "Duration min",
@@ -219,6 +245,7 @@
                     "power_max": "The power of the device when activated. Can be a number or a template",
                     "measured_power_entity_id": "Optional. Sensor measuring the real consumption of the device in W or kW (e.g. a smart plug). Only used to display the real consumption in the card: the algorithm keeps using the configured power as its budget.",
                     "active_switch_is_override": "Only used when the 'Respect manual changes' switch is on. Checked: turning the Solar Optimizer 'Active' switch on or off is respected as a manual override. Unchecked (default): it is a plain command the algorithm may revert at its next decision. A change made on the device itself is always respected as an override.",
+                    "phase": "Three-phase only. The phase the device is connected to, or three-phase for a load connected to the 3 phases (its power is split evenly). Ignored in single-phase.",
                     "check_usable_template": "The template to check if the device is usable. Example `True ` or `states('sensor.my_sensor') | float > 10` (don't forgeet double accolades)",
                     "check_active_template": "The template to check if the device is active. Keep it empty for switch type device or apparented. Example `is_state_attr('sensor.my_sensor', 'hvac_mode', 'heat')` (with double accolades)",
                     "duration_min": "The minimum duration of the device when turned on in minutes",
@@ -252,6 +279,7 @@
                     "power_entity_id": "Power entity id",
                     "measured_power_entity_id": "Measured power sensor",
                     "active_switch_is_override": "Consider Active switch action as override",
+                    "phase": "Phase",
                     "duration_power_min": "Duration of power change",
                     "change_power_service": "Power change service",
                     "convert_power_divide_factor": "Divide factor",
@@ -278,6 +306,7 @@
                     "power_entity_id": "The entity id of the power sensor",
                     "measured_power_entity_id": "Optional. Sensor measuring the real consumption of the device in W or kW (e.g. a smart plug). Only used to display the real consumption in the card: the algorithm keeps using the configured power as its budget.",
                     "active_switch_is_override": "Only used when the 'Respect manual changes' switch is on. Checked: turning the Solar Optimizer 'Active' switch on or off is respected as a manual override. Unchecked (default): it is a plain command the algorithm may revert at its next decision. A change made on the device itself is always respected as an override.",
+                    "phase": "Three-phase only. The phase the device is connected to, or three-phase for a load connected to the 3 phases (its power is split evenly). Ignored in single-phase.",
                     "duration_power_min": "The minimal duration of each power change in minutes",
                     "change_power_service": "The service used to change the power. Example `number/set_value`",
                     "convert_power_divide_factor": "The divide factor to convert power into units of the power device. If conversion from power to ampere, the divisor should be 220",
@@ -293,7 +322,8 @@
         "error": {
             "format_time_invalid": "Format of time should be HH:MM",
             "invalid_value": "The value is invalid or incompatible with the device limits",
-            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations"
+            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations",
+            "phase_entity_required": "All three phase consumption entities are required in three-phase mode"
         }
     },
     "selector": {
@@ -308,6 +338,20 @@
             "options": {
                 "action_call": "Action call",
                 "event": "Event"
+            }
+        },
+        "phase_mode": {
+            "options": {
+                "single_phase": "Single-phase",
+                "three_phase": "Three-phase"
+            }
+        },
+        "phase": {
+            "options": {
+                "1": "Phase 1 (L1)",
+                "2": "Phase 2 (L2)",
+                "3": "Phase 3 (L3)",
+                "all": "Three-phase (L1+L2+L3)"
             }
         }
     },

@@ -5,6 +5,7 @@ import math
 import copy
 
 from .managed_device import ManagedDevice
+from .const import DEFAULT_PHASE, phase_shares
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,6 +58,7 @@ class SimulatedAnnealingAlgorithm:
         sell_tax_percent: float,
         battery_soc: float,
         priority_weight: int,
+        phase_consumption: dict[str, float] | None = None,
     ):
         """The entrypoint of the algorithm:
         You should give:
@@ -68,6 +70,8 @@ class SimulatedAnnealingAlgorithm:
          - sell_tax_percent: a sell taxe applied to sell energy (a percentage)
          - battery_soc: the state of charge of the battery (0-100)
          - priority_weight: the weight of the priority in the cost calculation. 10 means 10%
+         - phase_consumption: three-phase only, the net consumption of each phase ({"1": W, "2": W, "3": W}).
+           Each device then only changes the net of its own phase(s). None means single-phase.
 
          In return you will have:
           - best_solution: a list of object in whitch name, power_max and state are set,
@@ -81,6 +85,7 @@ class SimulatedAnnealingAlgorithm:
             or sell_cost is None
             or buy_cost is None
             or sell_tax_percent is None
+            or (phase_consumption is not None and None in phase_consumption.values())
         ):
             _LOGGER.info(
                 "Not all informations are available for Simulated Annealign algorithm to work. Calculation is abandoned"
@@ -99,7 +104,9 @@ class SimulatedAnnealingAlgorithm:
         self._cout_achat = buy_cost
         self._cout_revente = sell_cost
         self._taxe_revente = sell_tax_percent
-        self._consommation_net = power_consumption
+        # Net consumption per phase. Single-phase is just one phase holding the whole net.
+        three_phase = phase_consumption is not None
+        self._consommation_net = dict(phase_consumption) if three_phase else {DEFAULT_PHASE: power_consumption}
         self._production_solaire = solar_power_production
         self._priority_weight = priority_weight / 100.0  # to get percentage
 
@@ -142,6 +149,7 @@ class SimulatedAnnealingAlgorithm:
                     "is_waiting": waiting,
                     "can_change_power": device.can_change_power,
                     "priority": device.priority,
+                    "phases": phase_shares(device.phase) if three_phase else {DEFAULT_PHASE: 1.0},
                 }
             )
         if DEBUG:
@@ -212,33 +220,29 @@ class SimulatedAnnealingAlgorithm:
         """
 
         puissance_totale_eqt = self.consommation_equipements(solution)
-        diff_puissance_totale_eqt = (
-            puissance_totale_eqt - self._puissance_totale_eqt_initiale
-        )
-
-        new_consommation_net = self._consommation_net + diff_puissance_totale_eqt
-        new_rejets = 0 if new_consommation_net >= 0 else -new_consommation_net
-        new_import = 0 if new_consommation_net < 0 else new_consommation_net
-        new_consommation_solaire = min(
-            self._production_solaire, self._production_solaire - new_rejets
-        )
-        new_consommation_totale = (
-            new_consommation_net + new_rejets
-        ) + new_consommation_solaire
-        if DEBUG:
-            _LOGGER.debug(
-                "Objectif : cette solution ajoute %.3fW a la consommation initial. Nouvelle consommation nette=%.3fW. Nouveaux rejets=%.3fW. Nouvelle conso totale=%.3fW",
-                diff_puissance_totale_eqt,
-                new_consommation_net,
-                new_rejets,
-                new_consommation_totale,
-            )
+        puissance_phases = self.consommation_phases(solution)
 
         cout_revente_impose = self._cout_revente * (1.0 - self._taxe_revente / 100.0)
         coef_import = (self._cout_achat) / (self._cout_achat + cout_revente_impose)
         coef_rejets = (cout_revente_impose) / (self._cout_achat + cout_revente_impose)
 
-        consumption_coef = coef_import * new_import + coef_rejets * new_rejets
+        # Import and export are evaluated phase by phase: exporting on one phase while
+        # importing on another costs on both. Single-phase has only one phase.
+        consumption_coef = 0
+        for phase, consommation_net in self._consommation_net.items():
+            diff_puissance_eqt = puissance_phases[phase] - self._puissance_phases_initiale[phase]
+            new_consommation_net = consommation_net + diff_puissance_eqt
+            new_rejets = 0 if new_consommation_net >= 0 else -new_consommation_net
+            new_import = 0 if new_consommation_net < 0 else new_consommation_net
+            if DEBUG:
+                _LOGGER.debug(
+                    "Objectif phase %s : cette solution ajoute %.3fW a la consommation initiale. Nouvelle consommation nette=%.3fW. Nouveaux rejets=%.3fW",
+                    phase,
+                    diff_puissance_eqt,
+                    new_consommation_net,
+                    new_rejets,
+                )
+            consumption_coef += coef_import * new_import + coef_rejets * new_rejets
         # calculate the priority coef as the sum of the priority of all devices
         # in the solution
         if puissance_totale_eqt > 0:
@@ -253,6 +257,7 @@ class SimulatedAnnealingAlgorithm:
     def generer_solution_initiale(self, solution):
         """Generate the initial solution (which is the solution given in argument) and calculate the total initial power"""
         self._puissance_totale_eqt_initiale = self.consommation_equipements(solution)
+        self._puissance_phases_initiale = self.consommation_phases(solution)
         return copy.deepcopy(solution)
 
     def consommation_equipements(self, solution):
@@ -262,6 +267,15 @@ class SimulatedAnnealingAlgorithm:
             for _, equipement in enumerate(solution)
             if equipement["state"]
         )
+
+    def consommation_phases(self, solution) -> dict[str, float]:
+        """The power consumption of all active equipment, per phase"""
+        phases = {phase: 0 for phase in self._consommation_net}
+        for equipement in solution:
+            if equipement["state"]:
+                for phase, share in equipement["phases"].items():
+                    phases[phase] += share * equipement["requested_power"]
+        return phases
 
     def calculer_new_power(
         self, current_power, power_step, power_min, power_max, can_switch_off
