@@ -25,7 +25,20 @@ from homeassistant.util.unit_conversion import (
 
 from homeassistant.config_entries import ConfigEntry
 
-from .const import DEFAULT_REFRESH_PERIOD_SEC, name_to_unique_id, SOLAR_OPTIMIZER_DOMAIN, DEFAULT_RAZ_TIME
+from .const import (
+    DEFAULT_REFRESH_PERIOD_SEC,
+    name_to_unique_id,
+    SOLAR_OPTIMIZER_DOMAIN,
+    DEFAULT_RAZ_TIME,
+    CONF_PHASE_MODE,
+    CONF_PHASE_MODE_THREE,
+    CONF_POWER_CONSUMPTION_L1_ENTITY_ID,
+    CONF_POWER_CONSUMPTION_L2_ENTITY_ID,
+    CONF_POWER_CONSUMPTION_L3_ENTITY_ID,
+    CONF_BATTERY_PHASE,
+    PHASES,
+    phase_shares,
+)
 from .managed_device import ManagedDevice
 from .simulated_annealing_algo import SimulatedAnnealingAlgorithm
 
@@ -60,6 +73,8 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         self._devices: list[ManagedDevice] = []
         self._power_consumption_entity_id: str = None
         self._power_production_entity_id: str = None
+        self._phase_entity_ids: dict[str, str] | None = None
+        self._battery_phase: str | None = None
         self._subscribe_to_events: bool = False
         self._unsub_events = None
         self._unsub_raz_override = None
@@ -108,6 +123,21 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         self._power_production_entity_id = config.data.get("power_production_entity_id")
         self._subscribe_to_events = config.data.get("subscribe_to_events")
 
+        # Three-phase: one net consumption entity per phase ("1", "2", "3"). None = single-phase.
+        self._phase_entity_ids: dict[str, str] | None = None
+        if config.data.get(CONF_PHASE_MODE) == CONF_PHASE_MODE_THREE:
+            self._phase_entity_ids = dict(
+                zip(
+                    PHASES,
+                    [
+                        config.data.get(CONF_POWER_CONSUMPTION_L1_ENTITY_ID),
+                        config.data.get(CONF_POWER_CONSUMPTION_L2_ENTITY_ID),
+                        config.data.get(CONF_POWER_CONSUMPTION_L3_ENTITY_ID),
+                    ],
+                )
+            )
+        self._battery_phase = config.data.get(CONF_BATTERY_PHASE)
+
         if self._unsub_events is not None:
             self._unsub_events()
             self._unsub_events = None
@@ -115,7 +145,8 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
         if self._subscribe_to_events:
             self._unsub_events = async_track_state_change_event(
                 self.hass,
-                [self._power_consumption_entity_id, self._power_production_entity_id],
+                [self._power_consumption_entity_id, self._power_production_entity_id]
+                + list((self._phase_entity_ids or {}).values()),
                 self._async_on_change)
 
         self._sell_cost_entity_id = config.data.get("sell_cost_entity_id")
@@ -235,6 +266,20 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
 
         calculated_data["priority_weight"] = self.priority_weight
 
+        # Three-phase: net consumption of each phase, the battery charging power being
+        # added to the phase(s) of the inverter (like it is added to the global net below)
+        phase_consumption = None
+        calculated_data["power_consumption_phases"] = None
+        if self._phase_entity_ids:
+            phases = {p: get_safe_float(self.hass, entity_id, "W") for p, entity_id in self._phase_entity_ids.items()}
+            calculated_data["power_consumption_phases"] = phases
+            if None not in phases.values():
+                phase_consumption = dict(phases)
+                for p, share in phase_shares(self._battery_phase).items():
+                    phase_consumption[p] += share * calculated_data["battery_charge_power"]
+            else:
+                phase_consumption = phases  # the algorithm abandons the calculation if a phase is unknown
+
         #
         # Call Algorithm Recuit simulé
         #
@@ -247,6 +292,7 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
             calculated_data["sell_tax_percent"],
             calculated_data["battery_soc"],
             calculated_data["priority_weight"],
+            phase_consumption,
         )
 
         calculated_data["best_solution"] = best_solution

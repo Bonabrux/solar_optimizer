@@ -20,6 +20,7 @@
   - [Installation manuelle](#installation-manuelle)
 - [La configuration](#la-configuration)
   - [Configurer l'intégration pour la première fois](#configurer-lintégration-pour-la-première-fois)
+  - [Installations triphasées](#installations-triphasées)
   - [Configurer les équipements](#configurer-les-équipements)
     - [Configurer un équipement simple (on/off)](#configurer-un-équipement-simple-onoff)
   - [Configurer un équipement avec une puissance variable](#configurer-un-équipement-avec-une-puissance-variable)
@@ -173,6 +174,18 @@ Vous devez spécifier :
 
 A part l'état de charge de la batterie solaire, ces informations sont nécessaires à l'algorithme pour fonctionner, elles sont donc toutes obligatoires. Le fait que ce soit des sensor ou input_number permet d'avoir des valeurs qui sont réévaluées à chaque cycle. En conséquence le passage en heure creuse peut modifier le calcul et donc les états des équipements puisque l'import devient moins cher. Donc tout est dynamique et recalculé à chaque cycle.
 
+## Installations triphasées
+
+Par défaut l'installation est **monophasée** et rien ne change : l'algorithme équilibre la consommation nette globale.
+
+Sur une installation **triphasée**, un surplus sur une phase ne compense pas un import sur une autre si votre compteur facture chaque phase séparément. Choisissez `Triphasée` dans **Type d'installation** et renseignez :
+- les 3 sensors de **consommation nette par phase** (L1, L2, L3), en W, négatifs quand la phase injecte sur le réseau,
+- la **phase de la batterie / de l'onduleur hybride** : la phase de l'onduleur de la batterie (`1`, `2`, `3`) ou `Triphasé` pour un onduleur triphasé. La puissance de charge de la batterie est ajoutée à cette phase seulement (répartie à parts égales pour un onduleur triphasé).
+
+Puis renseignez la **Phase** de chaque équipement : `1`, `2`, `3`, ou `Triphasé (L1+L2+L3)` pour une charge raccordée aux 3 phases (sa puissance est répartie à parts égales). L'algorithme évalue l'import et l'export phase par phase : un équipement est allumé avec le surplus de sa propre phase. Le sensor de consommation nette globale reste utilisé pour l'affichage.
+
+En monophasé, les champs par phase et la phase des équipements sont ignorés.
+
 ## Configurer les équipements
 Chaque équipements pilotable doit ensuite être configuré en ajoutant une nouvelle intégration via la bouton "Ajouter un équipement" disponible dans la page de l'intégration :
 
@@ -204,6 +217,7 @@ Vous devez spécifier les attributs suivant :
 | `battery_soc_threshold`       | tous                                    | le pourcentage minimal de charge de la batterie pour que l'équipement soit utilisable                                                                                                                                                        | 30                                                    | Dans cet exemple, l'équipement ne sera utilisable par l'algorithme si la batterie solaire n'est pas chargée à au moins 30%. Nécessite le renseignement de l'entité d'état de charge de la batterie dans les paramètres communs. Cf. ci-dessus. |
 | `max_on_time_per_day_min`     | tous                                    | le nombre de minutes maximal en position allumé pour cet équipement. Au delà, l'équipement n'est plus utilisable par l'algorithme                                                                                                            | 10                                                    | L'équipement sera allumé au maximum 10 minutes par jour                                                                                                                                                                                        |
 | `min_on_time_per_day_min`     | tous                                    | le nombre de minutes minimale en position allumé pour cet équipement. Si lors du démarrage des heures creuses, ce minimum n'est pas atteint alors l'équipement sera allumé à concurrence du début de journée ou du `max_on_time_per_day_min` | 5                                                     | L'équipement est sera allumé au minimum 5 minutes par jour ; soit pendant la production solaire, soit pendant les heures creuses                                                                                                               |
+| `phase`                       | tous (triphasé uniquement)              | La phase sur laquelle est raccordé l'équipement : `1`, `2`, `3` ou `all` pour une charge triphasée                                                                                                                                          | 2                                                     | Ignoré en monophasé. Cf. [Installations triphasées](#installations-triphasées)                                                                                                                                                                  |
 | `measured_power_entity_id`    | tous (optionnel)                        | Un capteur qui mesure la puissance réellement consommée par l'équipement, en W ou kW (ex : prise connectée)                                                                                                                                  | sensor.lave_linge_puissance                           | Affichage seulement : la carte montre la puissance mesurée dans la barre et le graphique de puissance, avec la puissance configurée en pointillés. L'algorithme continue d'utiliser `power_max` comme budget.                                   |
 | `offpeak_time`                | tous                                    | L'heure de début des heures creuses au format hh:mm                                                                                                                                                                                          | 22:00                                                 | L'équipement pourra être allumé à 22h00 si la production de la journée n'a pas été suffisante                                                                                                                                                  |
 
@@ -413,6 +427,7 @@ Ce dernier switch possède des attributs consultables via Outils de developpemen
 4. `can_change_power` : true si la puissance peut être adaptée,
 5. `current_power` : la puissance courante de l'appareil,
 5. `measured_power_entity_id` : le capteur de puissance mesurée s'il est configuré (utilisé par la carte uniquement),
+5. `phase` : la phase de l'équipement (`1`, `2`, `3` ou `all`), utilisée en triphasé,
 6. `requested_power` : la puissance demandée par Solar Optimizer,
 7. `duration_sec` : la durée d'allumage en secondes,
 8. `duration_power_sec` : la durée d'un changement de puissance en secondes,

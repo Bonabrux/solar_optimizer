@@ -25,6 +25,30 @@ CONF_ACTION_MODE_EVENT = "event"
 
 CONF_ACTION_MODES = [CONF_ACTION_MODE_ACTION, CONF_ACTION_MODE_EVENT]
 
+# Three-phase support. In single-phase mode everything is on phase "1".
+CONF_PHASE_MODE = "phase_mode"
+CONF_PHASE_MODE_SINGLE = "single_phase"
+CONF_PHASE_MODE_THREE = "three_phase"
+CONF_PHASE_MODES = [CONF_PHASE_MODE_SINGLE, CONF_PHASE_MODE_THREE]
+CONF_POWER_CONSUMPTION_L1_ENTITY_ID = "power_consumption_l1_entity_id"
+CONF_POWER_CONSUMPTION_L2_ENTITY_ID = "power_consumption_l2_entity_id"
+CONF_POWER_CONSUMPTION_L3_ENTITY_ID = "power_consumption_l3_entity_id"
+CONF_BATTERY_PHASE = "battery_phase"
+CONF_PHASE = "phase"
+PHASE_ALL = "all"
+PHASES = ["1", "2", "3"]
+CONF_PHASE_OPTIONS = PHASES + [PHASE_ALL]
+DEFAULT_PHASE = "1"
+
+
+def phase_shares(phase: str | None) -> dict[str, float]:
+    """Share of a load (or of the battery) on each phase: 1/3 per phase for a
+    three-phase load, everything on its own phase otherwise"""
+    if phase == PHASE_ALL:
+        return {p: 1 / 3 for p in PHASES}
+    return {phase if phase in PHASES else DEFAULT_PHASE: 1.0}
+
+
 EVENT_TYPE_SOLAR_OPTIMIZER_CHANGE_POWER = "solar_optimizer_change_power_event"
 EVENT_TYPE_SOLAR_OPTIMIZER_STATE_CHANGE = "solar_optimizer_state_change_event"
 
@@ -231,3 +255,7 @@ class UnknownEntity(HomeAssistantError):
 
 class InvalidTime(HomeAssistantError):
     """Error to indicate the give time is invalid"""
+
+
+class PhaseEntityRequired(HomeAssistantError):
+    """Error to indicate a per-phase power entity is missing in three-phase mode"""

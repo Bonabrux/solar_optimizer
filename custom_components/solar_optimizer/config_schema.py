@@ -42,6 +42,18 @@ central_config_schema = vol.Schema(
         vol.Required(CONF_POWER_PRODUCTION_ENTITY_ID): selector.EntitySelector(
             selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN])
         ),
+        vol.Optional(CONF_PHASE_MODE, default=CONF_PHASE_MODE_SINGLE): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=CONF_PHASE_MODES, translation_key="phase_mode", mode="dropdown")
+        ),
+        vol.Optional(CONF_POWER_CONSUMPTION_L1_ENTITY_ID): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN])
+        ),
+        vol.Optional(CONF_POWER_CONSUMPTION_L2_ENTITY_ID): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN])
+        ),
+        vol.Optional(CONF_POWER_CONSUMPTION_L3_ENTITY_ID): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN])
+        ),
         vol.Optional(CONF_SUBSCRIBE_TO_EVENTS, default=False): cv.boolean,
         vol.Required(CONF_SELL_COST_ENTITY_ID): selector.EntitySelector(
             selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN])
@@ -59,6 +71,9 @@ central_config_schema = vol.Schema(
         vol.Optional(CONF_BATTERY_CHARGE_POWER_ENTITY_ID): selector.EntitySelector(
             selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN])
         ),
+        vol.Optional(CONF_BATTERY_PHASE, default=DEFAULT_PHASE): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=CONF_PHASE_OPTIONS, translation_key="phase", mode="dropdown")
+        ),
         vol.Optional(CONF_RAZ_TIME, default=DEFAULT_RAZ_TIME): str,
     }
 )
@@ -72,6 +87,9 @@ managed_device_schema = vol.Schema(
         vol.Required(CONF_POWER_MAX): str,
         vol.Optional(CONF_MEASURED_POWER_ENTITY_ID): selector.EntitySelector(
             selector.EntitySelectorConfig(domain=SENSOR_DOMAIN, device_class="power")
+        ),
+        vol.Optional(CONF_PHASE, default=DEFAULT_PHASE): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=CONF_PHASE_OPTIONS, translation_key="phase", mode="dropdown")
         ),
         vol.Optional(CONF_CHECK_USABLE_TEMPLATE, default="{{ True }}"): str,
         vol.Optional(CONF_CHECK_ACTIVE_TEMPLATE): str,
@@ -121,6 +139,9 @@ power_managed_device_schema = vol.Schema(
         vol.Optional(CONF_POWER_STEP, default=220): vol.All(vol.Coerce(float), vol.Range(min=0, min_included=False)),
         vol.Optional(CONF_MEASURED_POWER_ENTITY_ID): selector.EntitySelector(
             selector.EntitySelectorConfig(domain=SENSOR_DOMAIN, device_class="power")
+        ),
+        vol.Optional(CONF_PHASE, default=DEFAULT_PHASE): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=CONF_PHASE_OPTIONS, translation_key="phase", mode="dropdown")
         ),
         vol.Optional(CONF_CHECK_USABLE_TEMPLATE, default="{{ True }}"): str,
         vol.Optional(CONF_CHECK_ACTIVE_TEMPLATE): str,

@@ -266,6 +266,10 @@ class SolarOptimizerCard extends HTMLElement {
             display: inline-block;
             vertical-align: middle;
           }
+          solar-optimizer-card .so-badge-phase {
+            background-color: var(--secondary-background-color, #e0e0e0);
+            color: var(--primary-text-color);
+          }
           solar-optimizer-card .so-badge-active {
             background-color: var(--success-color, #4caf50);
             color: white;
@@ -528,15 +532,19 @@ class SolarOptimizerCard extends HTMLElement {
 
     // Recherche robuste d'un sensor SO central : essai direct, puis avec préfixe,
     // puis scan des states (gère les entity_id générés par HA avec préfixe d'instance)
-    const getSoState = (idx) => {
+    const getSoStateObj = (idx) => {
       if (this._hass.states[`sensor.${idx}`])
-        return this._hass.states[`sensor.${idx}`].state;
+        return this._hass.states[`sensor.${idx}`];
       if (this._hass.states[`sensor.solar_optimizer_${idx}`])
-        return this._hass.states[`sensor.solar_optimizer_${idx}`].state;
+        return this._hass.states[`sensor.solar_optimizer_${idx}`];
       const found = Object.keys(this._hass.states).find(k =>
         k.startsWith('sensor.') && k.includes('solar_optimizer') && k.endsWith(`_${idx}`)
       );
-      return found ? this._hass.states[found].state : 'N/A';
+      return found ? this._hass.states[found] : null;
+    };
+    const getSoState = (idx) => {
+      const obj = getSoStateObj(idx);
+      return obj ? obj.state : 'N/A';
     };
 
     // Récupérer les entités centrales
@@ -544,6 +552,10 @@ class SolarOptimizerCard extends HTMLElement {
     const totalPower = getSoState('total_power');
     const powerProduction = getSoState('power_production');
     const powerConsumption = getSoState('power_consumption');
+    // Triphasé : le capteur de consommation nette porte les attributs l1, l2, l3
+    const consumptionAttrs = (getSoStateObj('power_consumption') || {}).attributes || {};
+    const threePhase = consumptionAttrs.l1 !== undefined;
+    const phaseLabel = (phase) => phase === 'all' ? 'L1+L2+L3' : `L${phase}`;
     const batterySoc = getSoState('battery_soc');
 
     // Récupérer la liste des switch (les Managed Devices) de solar_optimizer
@@ -765,6 +777,7 @@ class SolarOptimizerCard extends HTMLElement {
               </button>
               <span class="so-device-name">${attrs.device_name || deviceId}</span>
               ${statusBadge}
+              ${threePhase && attrs.phase ? `<span class="so-badge so-badge-phase">${phaseLabel(attrs.phase)}</span>` : ''}
             </div>
             <div class="so-actions">
               ${startStopHtml}
@@ -820,6 +833,7 @@ class SolarOptimizerCard extends HTMLElement {
           <ha-icon icon="mdi:home-lightning-bolt" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('netConsumption')}</span>
           <span class="so-stat-value">${powerConsumption} W</span>
+          ${threePhase ? `<span class="so-stat-title">${['1', '2', '3'].map(p => `${phaseLabel(p)} ${consumptionAttrs['l' + p] ?? 'N/A'}`).join(' · ')} W</span>` : ''}
         </div>
         <div class="so-stat-box">
           <ha-icon icon="mdi:battery" style="color:var(--success-color,#4caf50);margin-bottom:4px;"></ha-icon>

@@ -5,7 +5,9 @@ sobre esta integración de Home Assistant (fork personal de jmcollin78/solar_opt
 para poder retomar el trabajo con Claude desde otra sesión/dispositivo sin perder contexto.
 
 Repo: `bonabrux/solar_optimizer`
-Rama de trabajo: `claude/solar-optimizer-improvements-6ynf06`
+Rama de trabajo actual: `claude/three-phase` (Fase 3), creada desde la rama del PR #215
+`feature/manual-override-measured-power`, que NO se toca (por si hay que volver a ese código).
+La rama vieja `claude/solar-optimizer-improvements-6ynf06` quedó como histórico (Fases 1-2).
 No se debe abrir Pull Request hasta que el usuario lo pida explícitamente — probar
 todo a fondo primero. Todo el trabajo se pushea a esa rama en el fork.
 
@@ -86,10 +88,8 @@ valor monetario (estaba mal etiquetado como `SensorDeviceClass.MONETARY` con "�
 
 - **Fase 1** (fixes chicos, bajo riesgo) — **HECHA en esta rama**
 - **Fase 2** (override manual + moneda) — **HECHA en esta rama**
-- **Fase 3** (soporte trifásico) — **NO empezada**. Requiere diseño previo:
-  selector monofásico/trifásico en config central, entidades de consumo/producción
-  por fase, atributo `phase` por dispositivo, y adaptar
-  `simulated_annealing_algo.py` para manejar 3 presupuestos en vez de uno.
+- **Fase 3** (soporte trifásico) — **HECHA en `claude/three-phase`** (06/10/2026), pendiente
+  de prueba real del usuario. Ver sección "Fase 3" abajo.
 - **Fase 4** (batería con prioridad de despacho) — **NO empezada**. Depende del
   diseño de Fase 3 para ser preciso (inversor híbrido monofásico del usuario está
   en una fase específica).
@@ -259,6 +259,30 @@ El usuario copió la rama a su HA y no vio cambios. Diagnóstico y correcciones:
 3. Cuando el usuario esté conforme, avisar para recién ahí abrir el Pull Request
    (explícitamente prohibido hacerlo antes, incluso si todo el código ya está
    pusheado a la rama).
-4. Diseñar Fase 3 (trifásico) en detalle antes de tocar código: nombres de campos
-   de config, migración de configs existentes con `config_flow.py`/`CONFIG_VERSION`.
+4. ~~Fase 3~~ hecha en `claude/three-phase`. Falta: prueba real del usuario y, con
+   su OK final explícito, PR (rama limpia, sin CLAUDE.md, apilada sobre #215 o
+   después de que #215 se mergee).
 5. Fase 4 (batería) después de Fase 3.
+
+## Fase 3: trifásico (implementada 06/10/2026)
+
+Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siempre).
+- Config central: `phase_mode` (`single_phase` por defecto / `three_phase`),
+  `power_consumption_l1/l2/l3_entity_id` (neto por fase, negativo exportando; obligatorios
+  en trifásico, validado en `config_flow.validate_input` -> error `phase_entity_required`),
+  `battery_phase` (`1`/`2`/`3`/`all`, la fase del inversor híbrido).
+- Dispositivo: `phase` (`1`/`2`/`3`/`all` = carga trifásica repartida 1/3 por fase).
+  Ignorado en monofásico. Helper `phase_shares()` en `const.py`.
+- Algoritmo: `_consommation_net` es un dict por fase (`{"1": neto}` en monofásico);
+  el costo import/export se suma fase por fase. Parámetro nuevo opcional
+  `phase_consumption` en `recuit_simule` (None = monofásico). La producción solar sigue
+  global (no entra en el costo, solo display). El sensor global de consumo se mantiene.
+- Coordinator: lee las 3 fases, suma la potencia de batería a `battery_phase`;
+  `power_consumption_phases` en los datos -> atributos `l1/l2/l3` del sensor
+  `power_consumption`. La card muestra neto por fase y badge de fase por dispositivo
+  solo si existen esos atributos.
+- Sin migración: todos los campos nuevos son opcionales con default.
+- Verificación: el algoritmo nuevo da resultados idénticos al de `upstream/main` en 500
+  escenarios monofásicos aleatorios con la misma semilla (script ad hoc, no commiteado).
+  `tests/test_three_phase.py` (8 tests) falla si se anula el cálculo por fase.
+  Suite: 121 passed, 11 skipped en HA 2026.6.1 y 2026.9.4.

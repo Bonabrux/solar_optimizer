@@ -23,6 +23,8 @@ from .const import (
     EVENT_TYPE_SOLAR_OPTIMIZER_CHANGE_POWER,
     EVENT_TYPE_SOLAR_OPTIMIZER_STATE_CHANGE,
     EVENT_TYPE_SOLAR_OPTIMIZER_ENABLE_STATE_CHANGE,
+    CONF_PHASE,
+    DEFAULT_PHASE,
 )
 
 ACTION_ACTIVATE = "Activate"
@@ -155,6 +157,9 @@ class ManagedDevice:
         self._power_entity_id = device_config.get("power_entity_id")
         # Display-only: real consumption sensor shown in the card, never used by the algorithm
         self._measured_power_entity_id = device_config.get("measured_power_entity_id")
+        # Phase the device is wired to ("1", "2", "3" or "all" for a three-phase load).
+        # Only used when the installation is configured as three-phase.
+        self._phase = device_config.get(CONF_PHASE) or DEFAULT_PHASE
         self._power_max = convert_to_template_or_value(hass, device_config.get("power_max"))
 
         self._power_min = (
@@ -723,6 +728,11 @@ class ManagedDevice:
     def entity_id(self) -> str:
         """The entity_id of the device"""
         return self._entity_id
+
+    @property
+    def phase(self) -> str:
+        """The phase of the device: "1", "2", "3" or "all" (three-phase load)"""
+        return self._phase
 
     @property
     def measured_power_entity_id(self) -> str | None:

@@ -20,6 +20,10 @@
           "refresh_period_sec": "Periodo di aggiornamento (in sec.)",
           "power_consumption_entity_id": "Consumo di energia da rete",
           "power_production_entity_id": "Produzione di energia solare",
+          "phase_mode": "Tipo di impianto",
+          "power_consumption_l1_entity_id": "Consumo netto fase 1",
+          "power_consumption_l2_entity_id": "Consumo netto fase 2",
+          "power_consumption_l3_entity_id": "Consumo netto fase 3",
           "subscribe_to_events": "Ricalcola per ogni nuovo valore di produzione/consumo",
           "sell_cost_entity_id": "Prezzo di vendita dell'energia",
           "buy_cost_entity_id": "Prezzo d'acquisto dell'energia",
@@ -27,12 +31,17 @@
           "smooth_production": "Ottimizza la produzione solare",
           "battery_soc_entity_id": "Stato di carica della batteria",
           "battery_charge_power_entity_id": "Potenza di carica della batteria",
+          "battery_phase": "Fase della batteria / inverter ibrido",
           "raz_time": "Orario di reset del contatore"
         },
         "data_description": {
           "refresh_period_sec": "Anche in assenza di nuovi dati, viene eseguito un aggiornamento in base al valore impostato. Attenzione: vengono eseguiti calcoli complessi, quindi tenere sotto controllo il carico della CPU. Non aggiornare troppo spesso",
           "power_consumption_entity_id": "L'entity_id del sensore di consumo di potenza dalla rete. La potenza deve essere negativa se l'energia viene esportata verso la rete.",
           "power_production_entity_id": "Entity_id del sensore di produzione di energia solare.",
+          "phase_mode": "Monofase (predefinito) o trifase. In trifase, ogni dispositivo è ottimizzato in base al consumo netto della propria fase.",
+          "power_consumption_l1_entity_id": "Solo trifase. L'entity_id del consumo netto della fase 1 (L1). Negativo se la potenza è immessa in rete.",
+          "power_consumption_l2_entity_id": "Solo trifase. L'entity_id del consumo netto della fase 2 (L2). Negativo se la potenza è immessa in rete.",
+          "power_consumption_l3_entity_id": "Solo trifase. L'entity_id del consumo netto della fase 3 (L3). Negativo se la potenza è immessa in rete.",
           "subscribe_to_events": "Se selezionato, il calcolo verrà eseguito ad ogni variazione del consumo o della produzione. Attenzione al carico della CPU.",
           "sell_cost_entity_id": "Entity_id che contiene l'attuale prezzo di vendita energetica.",
           "buy_cost_entity_id": "Entity_id che contiene l'attuale prezzo di acquisto dell'energia.",
@@ -40,6 +49,7 @@
           "smooth_production": "Se selezionato, la produzione solare verrà ottimizzata per evitare una brusca variazione",
           "battery_soc_entity_id": "L'entity_id dello stato di carica della batteria in %. Se non è presente una batteria, lasciare vuoto",
           "battery_charge_power_entity_id": "L'entity_id della potenza di carica della batteria in watt. Deve essere negativo se la batteria si sta caricando e positivo se la batteria si sta scaricando. Lasciare vuoto se non viene utilizzata alcuna batteria.",
+          "battery_phase": "Solo trifase. La fase a cui è collegato l'inverter della batteria, o tutte le fasi per un inverter trifase.",
           "raz_time": "Orario di reset dei contatori del tempo di attività. Dovrebbe essere prima dell'alba, ma non troppo presto, in modo da lasciare tempo sufficiente per l'attivazione notturna"
         }
       },
@@ -51,6 +61,7 @@
           "entity_id": "Entity id del dispositivo",
           "power_max": "Potenza del dispositivo",
           "measured_power_entity_id": "Sensore di potenza misurata",
+          "phase": "Fase",
           "check_usable_template": "Verifica se disponibile",
           "check_active_template": "Verifica se attivo",
           "duration_min": "Durata minina (in min.)",
@@ -68,6 +79,7 @@
           "entity_id": "L'entity_id del dispositivo",
           "power_max": "La potenza del dispositivo quando attivo. Può essere un numero o un modello",
           "measured_power_entity_id": "Opzionale. Sensore che misura il consumo reale del dispositivo in W o kW (es. presa smart). Usato solo per mostrare il consumo reale nella card: l'algoritmo continua a usare la potenza configurata come budget.",
+          "phase": "Solo trifase. La fase a cui è collegato il dispositivo, o trifase per un carico collegato alle 3 fasi (la sua potenza è ripartita in parti uguali). Ignorato in monofase.",
           "check_usable_template": "Il modello da verificare se il dispositivo è utilizzabile. Es. `True ` oppure `states('sensor.my_sensor') | float > 10` (ricordare sempre le doppie parentesi graffe)",
           "check_active_template": "Modello per verificare se un'apparecchiatura è attiva. Lasciare vuoto per semplici interruttori o simili. Esempio `is_state(‘sensor.my_sensor’, ‘hvac_mode’, ‘heat’)` (con le doppie parentesi graffe)",
           "duration_min": "La durata minima del dispositivo quando attivato in minuti",
@@ -99,6 +111,7 @@
           "deactivation_service": "Servizio di disattivazione",
           "power_entity_id": "Entity id della potenza",
           "measured_power_entity_id": "Sensore di potenza misurata",
+          "phase": "Fase",
           "duration_power_min": "Durata della variazione di potenza",
           "change_power_service": "Servizio di variazione della potenza",
           "convert_power_divide_factor": "Fattore di divisione",
@@ -122,6 +135,7 @@
           "deactivation_service": "Il servizio per disattivare il dispositivo. Es. `switch/turn_off` or `climate/set_hvac_mode/hvac_mode:off`",
           "power_entity_id": "Entity_id del sensore di potenza",
           "measured_power_entity_id": "Opzionale. Sensore che misura il consumo reale del dispositivo in W o kW (es. presa smart). Usato solo per mostrare il consumo reale nella card: l'algoritmo continua a usare la potenza configurata come budget.",
+          "phase": "Solo trifase. La fase a cui è collegato il dispositivo, o trifase per un carico collegato alle 3 fasi (la sua potenza è ripartita in parti uguali). Ignorato in monofase.",
           "duration_power_min": "La durata minima di ogni variazione di potenza in minuti",
           "change_power_service": "Il servizio utilizzato per modificare la potenza. Es. `number/set_value`",
           "convert_power_divide_factor": "Il fattore di divisione per convertire la potenza nell'unità di misura del dispositivo di alimentazione. In caso di conversione da watt in ampere, il divisore dovrebbe essere 230",
@@ -133,7 +147,8 @@
       }
     },
     "error": {
-      "format_time_invalid": "Il formato del tempo dovrebbe essere HH: mm"
+      "format_time_invalid": "Il formato del tempo dovrebbe essere HH: mm",
+      "phase_entity_required": "In trifase sono obbligatorie le tre entità di consumo per fase"
     }
   },
   "options": {
@@ -156,6 +171,10 @@
           "refresh_period_sec": "Periodo di aggiornamento",
           "power_consumption_entity_id": "Consumo di energia netto",
           "power_production_entity_id": "Produzione di energia solare",
+          "phase_mode": "Tipo di impianto",
+          "power_consumption_l1_entity_id": "Consumo netto fase 1",
+          "power_consumption_l2_entity_id": "Consumo netto fase 2",
+          "power_consumption_l3_entity_id": "Consumo netto fase 3",
           "subscribe_to_events": "Ricalcola con ogni nuovo valore di produzione/consumo",
           "sell_cost_entity_id": "Prezzo di vendita di energia",
           "buy_cost_entity_id": "Energia Acquista prezzo",
@@ -163,12 +182,17 @@
           "smooth_production": "Leviga la produzione solare",
           "battery_soc_entity_id": "Stato di carica della batteria",
           "battery_charge_power_entity_id": "Potenza di ricarica della batteria",
+          "battery_phase": "Fase della batteria / inverter ibrido",
           "raz_time": "Ripristina il contatore"
         },
         "data_description": {
           "refresh_period_sec": "Periodo di aggiornamento in secondi, anche in assenza di nuovi dati. Attenzione: vengono effettuati calcoli complessi che influiscono sul carico della CPU, non aggiornare troppo spesso",
           "power_consumption_entity_id": "entity_id del sensore di consumo di potenza. Deve essere negativo se immesso in rete.",
           "power_production_entity_id": "entity_id del sensore di produzione di energia solare.",
+          "phase_mode": "Monofase (predefinito) o trifase. In trifase, ogni dispositivo è ottimizzato in base al consumo netto della propria fase.",
+          "power_consumption_l1_entity_id": "Solo trifase. L'entity_id del consumo netto della fase 1 (L1). Negativo se la potenza è immessa in rete.",
+          "power_consumption_l2_entity_id": "Solo trifase. L'entity_id del consumo netto della fase 2 (L2). Negativo se la potenza è immessa in rete.",
+          "power_consumption_l3_entity_id": "Solo trifase. L'entity_id del consumo netto della fase 3 (L3). Negativo se la potenza è immessa in rete.",
           "subscribe_to_events": "Selezionare per ricalcolare con nuovi dati, non appena sono disponibili. Considerare il carico di lavoro della CPU.",
           "sell_cost_entity_id": "Entity_id che detiene l'attuale prezzo di vendita energetica.",
           "buy_cost_entity_id": "Entity_id che detiene l'attuale prezzo di acquisto dell'energia.",
@@ -176,6 +200,7 @@
           "smooth_production": "Se controllato, la produzione solare verrà levigata per evitare una dura variazione",
           "battery_soc_entity_id": "Entity_id dello stato di carica della batteria in %. Se non si dispone di una batteria, lasciare il campo vuoto",
           "battery_charge_power_entity_id": "L'entity_id che misura la potenza istantanea da/verso la batteria. Deve essere espresso in watt e deve essere positivo se la batteria si scarica e negativo se si carica. Lasciare vuoto se non si dispone di una batteria solare.",
+          "battery_phase": "Solo trifase. La fase a cui è collegato l'inverter della batteria, o tutte le fasi per un inverter trifase.",
           "raz_time": "Tempo per ripristinare i contatori del tempo attivo"
         }
       },
@@ -187,6 +212,7 @@
           "entity_id": "Entity id del dispositivo",
           "power_max": "Potenza del dispositivo",
           "measured_power_entity_id": "Sensore di potenza misurata",
+          "phase": "Fase",
           "check_usable_template": "Modello di utilizzabilità",
           "check_active_template": "Modello di attivazione",
           "duration_min": "Durata min",
@@ -204,6 +230,7 @@
           "entity_id": "Entity id del dispositivo",
           "power_max": "La potenza del dispositivo quando attivo. Può essere un numero o un modello",
           "measured_power_entity_id": "Opzionale. Sensore che misura il consumo reale del dispositivo in W o kW (es. presa smart). Usato solo per mostrare il consumo reale nella card: l'algoritmo continua a usare la potenza configurata come budget.",
+          "phase": "Solo trifase. La fase a cui è collegato il dispositivo, o trifase per un carico collegato alle 3 fasi (la sua potenza è ripartita in parti uguali). Ignorato in monofase.",
           "check_usable_template": "Il modello per verificare se il dispositivo è utilizzabile. Es. `True ` oppure `states('sensor.my_sensor') | float > 10` (non dimenticare le doppie parentesi graffe)",
           "check_active_template": "Il modello per verificare se il dispositivo è attivo. Lasciare vuoto per dispositivi come interruttori o similari. Esempio `is_state(‘sensor.my_sensor’, ‘hvac_mode’, ‘heat’)` (con doppie parentesi graffe)",
           "duration_min": "La durata minima del dispositivo quando attivato in minuti",
@@ -235,6 +262,7 @@
           "deactivation_service": "Servizio di disattivazione",
           "power_entity_id": "Entity id della Potenza",
           "measured_power_entity_id": "Sensore di potenza misurata",
+          "phase": "Fase",
           "duration_power_min": "Durata della variazione di potenza",
           "change_power_service": "Servizio di modifica dell'energia",
           "convert_power_divide_factor": "Fattore di divisione",
@@ -258,6 +286,7 @@
           "deactivation_service": "Il servizio per disattivare il dispositivo. Es. `switch/turn_off` oppure `climate/set_hvac_mode/hvac_mode:off`",
           "power_entity_id": "Entity id del sensore di potenza",
           "measured_power_entity_id": "Opzionale. Sensore che misura il consumo reale del dispositivo in W o kW (es. presa smart). Usato solo per mostrare il consumo reale nella card: l'algoritmo continua a usare la potenza configurata come budget.",
+          "phase": "Solo trifase. La fase a cui è collegato il dispositivo, o trifase per un carico collegato alle 3 fasi (la sua potenza è ripartita in parti uguali). Ignorato in monofase.",
           "duration_power_min": "La durata minima di ogni variazione di potenza in minuti",
           "change_power_service": "Il servizio utilizzato per modificare la potenza. Es. `number/set_value`",
           "convert_power_divide_factor": "Il fattore di divisione per convertire la potenza nell'unità di misura del dispositivo di alimentazione. In caso di conversione da watt in ampere, il divisore dovrebbe essere 230",
@@ -269,7 +298,8 @@
       }
     },
     "error": {
-      "format_time_invalid": "Il formato dell'ora dovrebbe essere HH: mm"
+      "format_time_invalid": "Il formato dell'ora dovrebbe essere HH: mm",
+      "phase_entity_required": "In trifase sono obbligatorie le tre entità di consumo per fase"
     }
   },
   "selector": {
@@ -284,6 +314,20 @@
       "options": {
         "action_call": "Azione",
         "event": "Evento"
+      }
+    },
+    "phase_mode": {
+      "options": {
+        "single_phase": "Monofase",
+        "three_phase": "Trifase"
+      }
+    },
+    "phase": {
+      "options": {
+        "1": "Fase 1 (L1)",
+        "2": "Fase 2 (L2)",
+        "3": "Fase 3 (L3)",
+        "all": "Trifase (L1+L2+L3)"
       }
     }
   }

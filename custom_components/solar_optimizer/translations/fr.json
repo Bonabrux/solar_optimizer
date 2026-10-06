@@ -20,6 +20,10 @@
                     "refresh_period_sec": "Période de rafraichissement",
                     "power_consumption_entity_id": "Consommation nette",
                     "power_production_entity_id": "Production solaire",
+                    "phase_mode": "Type d'installation",
+                    "power_consumption_l1_entity_id": "Consommation nette phase 1",
+                    "power_consumption_l2_entity_id": "Consommation nette phase 2",
+                    "power_consumption_l3_entity_id": "Consommation nette phase 3",
                     "subscribe_to_events": "Recalculer à chaque changement de la consommation ou de la production",
                     "sell_cost_entity_id": "Prix de vente de l'énergie",
                     "buy_cost_entity_id": "Prix d'achat de l'énergie",
@@ -27,12 +31,17 @@
                     "smooth_production": "Lisser la production solaire",
                     "battery_soc_entity_id": "Etat de charge de la batterie",
                     "battery_charge_power_entity_id": "Puissance de charge nette de la batterie",
+                    "battery_phase": "Phase de la batterie / de l'onduleur hybride",
                     "raz_time": "Heure de remise à zéro"
                 },
                 "data_description": {
                     "refresh_period_sec": "Période de rafraichissement en secondes. Attention des calculs lourds sont effectués à chaque période. Ne pas rafraichir trop souvent",
                     "power_consumption_entity_id": "l'entity_id du capteur de consommation nette. La consommation nette doit être négative si l'énergie est exportée vers le réseau.",
                     "power_production_entity_id": "l'entity_id du capteur de production d'énergie solaire. Doit être positif ou nul",
+                    "phase_mode": "Monophasée (par défaut) ou triphasée. En triphasé, chaque équipement est optimisé selon la consommation nette de sa propre phase.",
+                    "power_consumption_l1_entity_id": "Triphasé uniquement. L'entity_id de la consommation nette de la phase 1 (L1). Négative si la puissance est injectée sur le réseau.",
+                    "power_consumption_l2_entity_id": "Triphasé uniquement. L'entity_id de la consommation nette de la phase 2 (L2). Négative si la puissance est injectée sur le réseau.",
+                    "power_consumption_l3_entity_id": "Triphasé uniquement. L'entity_id de la consommation nette de la phase 3 (L3). Négative si la puissance est injectée sur le réseau.",
                     "subsribe_to_events": "Si coché, le calcul sera effectué à chaque changement de la consommation ou de la production. Attention à la charge CPU dans ce cas",
                     "sell_cost_entity_id": "L'entity_id qui contient le prix actuel de vente de l'énergie.",
                     "buy_cost_entity_id": "L'entity_id qui contient le prix actuel d'achat de l'énergie.",
@@ -40,6 +49,7 @@
                     "smooth_production": "Si coché, la production solaire sera lissée pour éviter les variations brutales",
                     "battery_soc_entity_id": "Etat de charge de la batterie en %. Si vous n'avez pas de batterie, laissez vide",
                     "battery_charge_power_entity_id": "L'entity_id qui mesure la charger nette de la batterie instantanée. Doit-être exprimé en watts, être positif si la batterie se décharge et négatif si la batterie charge. Laissez vide si vous n'avez pas de batterie solaire.",
+                    "battery_phase": "Triphasé uniquement. La phase sur laquelle est raccordé l'onduleur de la batterie, ou toutes les phases pour un onduleur triphasé.",
                     "raz_time": "Heure de remise à zéro des compteurs de temps passés. Devrait être avant la première exposition au soleil mais pas trop tôt pour laisser du temps à l'activation de nuit"
                 }
             },
@@ -51,6 +61,7 @@
                     "entity_id": "Entity id",
                     "power_max": "Puissance maximale",
                     "measured_power_entity_id": "Capteur de puissance mesurée",
+                    "phase": "Phase",
                     "check_usable_template": "Template d'utilisabilité",
                     "check_active_template": "Template d'activation",
                     "duration_min": "Durée mininale d'allumage",
@@ -68,6 +79,7 @@
                     "entity_id": "Entity id de l'équipement à piloter",
                     "power_max": "La puissance maximale de l'équipement lorsqu'il est activé",
                     "measured_power_entity_id": "Optionnel. Capteur mesurant la consommation réelle de l'équipement en W ou kW (ex : prise connectée). Utilisé uniquement pour afficher la consommation réelle dans la carte : l'algorithme continue d'utiliser la puissance configurée comme budget.",
+                    "phase": "Triphasé uniquement. La phase sur laquelle est raccordé l'équipement, ou triphasé pour une charge raccordée aux 3 phases (sa puissance est répartie à parts égales). Ignoré en monophasé.",
                     "check_usable_template": "Le template pour vérifier si l'équipement est utilisable. Exemple `True ` ou `states('sensor.my_sensor') | float > 10` (n'oubliez pas les doubles accolades)",
                     "check_active_template": "Le template pour vérifier si un équipement est actif. Laissez le vide pour les simples switch ou apparentés. Exemple `is_state_attr('sensor.my_sensor', 'hvac_mode', 'heat')` (avec les doubles accolades)",
                     "duration_min": "La durée minimale d'allumage de l'équipement en minutes",
@@ -99,6 +111,7 @@
                     "deactivation_service": "Service d'extinction",
                     "power_entity_id": "Entity id du capteur de puissance",
                     "measured_power_entity_id": "Capteur de puissance mesurée",
+                    "phase": "Phase",
                     "duration_power_min": "Durée de changement de puissance",
                     "change_power_service": "Service de changement de puissance",
                     "convert_power_divide_factor": "Facteur de division",
@@ -122,6 +135,7 @@
                     "deactivation_service": "Le service pour éteindre l'équipement. Exemple `switch/turn_off` ou `climate/set_hvac_mode/hvac_mode:off`",
                     "power_entity_id": "L'entity id du capteur de puissance",
                     "measured_power_entity_id": "Optionnel. Capteur mesurant la consommation réelle de l'équipement en W ou kW (ex : prise connectée). Utilisé uniquement pour afficher la consommation réelle dans la carte : l'algorithme continue d'utiliser la puissance configurée comme budget.",
+                    "phase": "Triphasé uniquement. La phase sur laquelle est raccordé l'équipement, ou triphasé pour une charge raccordée aux 3 phases (sa puissance est répartie à parts égales). Ignoré en monophasé.",
                     "duration_power_min": "La durée minimale de chaque changement de puissance en minutes",
                     "change_power_service": "Le service utilisé pour changer la puissance. Exemple `number/set_value`",
                     "convert_power_divide_factor": "Le facteur de division pour convertir la puissance en unités de l'équipement. Si la conversion de la puissance en ampère, le diviseur doit être 220",
@@ -133,7 +147,8 @@
             }
         },
         "error": {
-            "format_time_invalid": "Le format de l'heure doit être HH:MM"
+            "format_time_invalid": "Le format de l'heure doit être HH:MM",
+            "phase_entity_required": "Les trois entités de consommation par phase sont obligatoires en triphasé"
         }
     },
     "options": {
@@ -156,6 +171,10 @@
                     "refresh_period_sec": "Période de rafraichissement",
                     "power_consumption_entity_id": "Consommation nette",
                     "power_production_entity_id": "Production solaire",
+                    "phase_mode": "Type d'installation",
+                    "power_consumption_l1_entity_id": "Consommation nette phase 1",
+                    "power_consumption_l2_entity_id": "Consommation nette phase 2",
+                    "power_consumption_l3_entity_id": "Consommation nette phase 3",
                     "subscribe_to_events": "Recalculer à chaque changement de la consommation ou de la production",
                     "sell_cost_entity_id": "Prix de vente de l'énergie",
                     "buy_cost_entity_id": "Prix d'achat de l'énergie",
@@ -163,12 +182,17 @@
                     "smooth_production": "Lisser la production solaire",
                     "battery_soc_entity_id": "Etat de charge de la batterie",
                     "battery_charge_power_entity_id": "Puissance de charge nette de la batterie",
+                    "battery_phase": "Phase de la batterie / de l'onduleur hybride",
                     "raz_time": "Heure de remise à zéro"
                 },
                 "data_description": {
                     "refresh_period_sec": "Période de rafraichissement en secondes. Attention des calculs lourds sont effectués à chaque période. Ne pas rafraichir trop souvent",
                     "power_consumption_entity_id": "l'entity_id du capteur de consommation nette. La consommation nette doit être négative si l'énergie est exportée vers le réseau.",
                     "power_production_entity_id": "l'entity_id du capteur de production d'énergie solaire. Doit être positif ou nul",
+                    "phase_mode": "Monophasée (par défaut) ou triphasée. En triphasé, chaque équipement est optimisé selon la consommation nette de sa propre phase.",
+                    "power_consumption_l1_entity_id": "Triphasé uniquement. L'entity_id de la consommation nette de la phase 1 (L1). Négative si la puissance est injectée sur le réseau.",
+                    "power_consumption_l2_entity_id": "Triphasé uniquement. L'entity_id de la consommation nette de la phase 2 (L2). Négative si la puissance est injectée sur le réseau.",
+                    "power_consumption_l3_entity_id": "Triphasé uniquement. L'entity_id de la consommation nette de la phase 3 (L3). Négative si la puissance est injectée sur le réseau.",
                     "subsribe_to_events": "Si coché, le calcul sera effectué à chaque changement de la consommation ou de la production. Attention à la charge CPU dans ce cas",
                     "sell_cost_entity_id": "L'entity_id qui contient le prix actuel de vente de l'énergie.",
                     "buy_cost_entity_id": "L'entity_id qui contient le prix actuel d'achat de l'énergie.",
@@ -176,6 +200,7 @@
                     "smooth_production": "Si coché, la production solaire sera lissée pour éviter les variations brutales",
                     "battery_soc_entity_id": "Etat de charge de la batterie en %. Si vous n'avez pas de batterie, laissez vide",
                     "battery_charge_power_entity_id": "L'entity_id qui mesure la charger nette de la batterie instantanée. Doit-être exprimé en watts, être positif si la batterie se décharge et négatif si la batterie charge. Laissez vide si vous n'avez pas de batterie solaire.",
+                    "battery_phase": "Triphasé uniquement. La phase sur laquelle est raccordé l'onduleur de la batterie, ou toutes les phases pour un onduleur triphasé.",
                     "raz_time": "Heure de remise à zéro des compteurs de temps passés. Devrait être avant la première exposition au soleil mais pas trop tôt pour laisser du temps à l'activation de nuit"
                 }
             },
@@ -187,6 +212,7 @@
                     "entity_id": "Entity id",
                     "power_max": "Puissance maximale",
                     "measured_power_entity_id": "Capteur de puissance mesurée",
+                    "phase": "Phase",
                     "check_usable_template": "Template d'utilisabilité",
                     "check_active_template": "Template d'activation",
                     "duration_min": "Durée mininale d'allumage",
@@ -204,6 +230,7 @@
                     "entity_id": "Entity id de l'équipement à piloter",
                     "power_max": "La puissance maximale de l'équipement lorsqu'il est activé",
                     "measured_power_entity_id": "Optionnel. Capteur mesurant la consommation réelle de l'équipement en W ou kW (ex : prise connectée). Utilisé uniquement pour afficher la consommation réelle dans la carte : l'algorithme continue d'utiliser la puissance configurée comme budget.",
+                    "phase": "Triphasé uniquement. La phase sur laquelle est raccordé l'équipement, ou triphasé pour une charge raccordée aux 3 phases (sa puissance est répartie à parts égales). Ignoré en monophasé.",
                     "check_usable_template": "Le template pour vérifier si l'équipement est utilisable. Exemple `True ` ou `states('sensor.my_sensor') | float > 10` (n'oubliez pas les doubles accolades)",
                     "check_active_template": "Le template pour vérifier si un équipement est actif. Laissez le vide pour les simples switch ou apparentés. Exemple `is_state_attr('sensor.my_sensor', 'hvac_mode', 'heat')` (avec les doubles accolades)",
                     "duration_min": "La durée minimale d'allumage de l'équipement en minutes",
@@ -235,6 +262,7 @@
                     "deactivation_service": "Service d'extinction",
                     "power_entity_id": "Entity id du capteur de puissance",
                     "measured_power_entity_id": "Capteur de puissance mesurée",
+                    "phase": "Phase",
                     "duration_power_min": "Durée de changement de puissance",
                     "change_power_service": "Service de changement de puissance",
                     "convert_power_divide_factor": "Facteur de division",
@@ -258,6 +286,7 @@
                     "deactivation_service": "Le service pour éteindre l'équipement. Exemple `switch/turn_off` ou `climate/set_hvac_mode/hvac_mode:off`",
                     "power_entity_id": "L'entity id du capteur de puissance",
                     "measured_power_entity_id": "Optionnel. Capteur mesurant la consommation réelle de l'équipement en W ou kW (ex : prise connectée). Utilisé uniquement pour afficher la consommation réelle dans la carte : l'algorithme continue d'utiliser la puissance configurée comme budget.",
+                    "phase": "Triphasé uniquement. La phase sur laquelle est raccordé l'équipement, ou triphasé pour une charge raccordée aux 3 phases (sa puissance est répartie à parts égales). Ignoré en monophasé.",
                     "duration_power_min": "La durée minimale de chaque changement de puissance en minutes",
                     "change_power_service": "Le service utilisé pour changer la puissance. Exemple `number/set_value`",
                     "convert_power_divide_factor": "Le facteur de division pour convertir la puissance en unités de l'équipement. Si la conversion de la puissance en ampère, le diviseur doit être 220",
@@ -269,7 +298,8 @@
             }
         },
         "error": {
-            "format_time_invalid": "Le format de l'heure doit être HH:MM"
+            "format_time_invalid": "Le format de l'heure doit être HH:MM",
+            "phase_entity_required": "Les trois entités de consommation par phase sont obligatoires en triphasé"
         }
     },
     "selector": {
@@ -284,6 +314,20 @@
             "options": {
                 "action_call": "Appel d'action",
                 "event": "Evènement"
+            }
+        },
+        "phase_mode": {
+            "options": {
+                "single_phase": "Monophasée",
+                "three_phase": "Triphasée"
+            }
+        },
+        "phase": {
+            "options": {
+                "1": "Phase 1 (L1)",
+                "2": "Phase 2 (L2)",
+                "3": "Phase 3 (L3)",
+                "all": "Triphasé (L1+L2+L3)"
             }
         }
     }

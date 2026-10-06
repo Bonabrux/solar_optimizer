@@ -20,6 +20,7 @@
   - [Manual Install](#manual-install)
 - [The configuration](#the-configuration)
   - [Configure the Integration for the First Time](#configure-the-integration-for-the-first-time)
+  - [Three-phase installations](#three-phase-installations)
   - [Configure the Devices](#configure-the-devices)
     - [Configuring a Simple Device (On/Off)](#configuring-a-simple-device-onoff)
   - [Configuring a Device with Variable Power](#configuring-a-device-with-variable-power)
@@ -189,6 +190,18 @@ You need to specify:
 
 Except for the solar battery charge level, these parameters are essential for the algorithm to function, so they are all mandatory. Using sensors or `input_number` allows values to be updated in real-time at each cycle. Consequently, when off-peak hours begin, the calculation may change, impacting the state of the equipment as importing energy becomes cheaper. Everything is dynamic and recalculated in each cycle.
 
+## Three-phase installations
+
+By default the installation is **single-phase** and nothing changes: the algorithm balances the global net consumption.
+
+On a **three-phase** installation, a surplus on one phase does not compensate an import on another one if your meter bills each phase separately. Set **Installation type** to `Three-phase` and give:
+- the 3 sensors of **net consumption per phase** (L1, L2, L3), in W, negative when the phase exports to the grid,
+- the **battery / hybrid inverter phase**: the phase of the battery inverter (`1`, `2`, `3`) or `Three-phase` for a three-phase inverter. The battery charging power is added to that phase only (split evenly for a three-phase inverter).
+
+Then set the **Phase** of each device: `1`, `2`, `3`, or `Three-phase (L1+L2+L3)` for a load connected to the 3 phases (its power is split evenly on each phase). The algorithm evaluates import and export phase by phase, so a device is turned on with the surplus of its own phase. The global net consumption sensor is still used for display.
+
+In single-phase mode, the per-phase fields and the device phase are ignored.
+
 ## Configure the Devices
 Each controllable device must be configured by adding a new integration via the "Add a device" button available on the integration page:
 
@@ -220,6 +233,7 @@ You need to specify the following attributes:
 | `battery_soc_threshold`       | All                                 | The minimum battery charge percentage required for the device to be usable.                                                                                                                                                            | 30                                               | In this example, the device will not be used by the algorithm if the solar battery is not charged to at least 30%. Requires the battery charge state entity to be configured in the common parameters. See above. |
 | `max_on_time_per_day_min`     | All                                 | The maximum number of minutes the device can be on per day. Once exceeded, the device will no longer be used by the algorithm.                                                                                                         | 10                                               | The device will be turned on for a maximum of 10 minutes per day.                                                                                                                                                 |
 | `min_on_time_per_day_min`     | All                                 | The minimum number of minutes the device should be on per day. If this threshold is not reached by the start of off-peak hours, the device will be activated until the start of the day or until `max_on_time_per_day_min` is reached. | 5                                                | The device will run for at least 5 minutes per day, either during solar production or during off-peak hours.                                                                                                      |
+| `phase`                       | All (three-phase only)              | The phase the device is connected to: `1`, `2`, `3` or `all` for a three-phase load.                                                                                                                                                  | 2                                                | Ignored in single-phase. See [Three-phase installations](#three-phase-installations).                                                                                                                              |
 | `measured_power_entity_id`    | All (optional)                      | A sensor measuring the real power consumption of the device, in W or kW (e.g. a smart plug).                                                                                                                                          | sensor.washing_machine_power                     | Display only: the card shows the measured power in the power bar and the power graph, with the configured power as a dashed reference line. The algorithm keeps using `power_max` as its budget.                  |
 | `offpeak_time`                | All                                 | The start time of off-peak hours in `hh:mm` format.                                                                                                                                                                                    | 22:00                                            | The device may be turned on at 22:00 if solar production during the day was insufficient.                                                                                                                         |
 
@@ -451,6 +465,7 @@ The `switch.solar_optimizer_<name>` contains **attributes** accessible via **Dev
 | `can_change_power`          | `true` if the device's power **can** be adjusted.                                           |
 | `current_power`             | The **current power consumption** of the device.                                            |
 | `measured_power_entity_id`  | The sensor measuring the **real** consumption, if configured (used by the card only).       |
+| `phase`                     | The phase of the device (`1`, `2`, `3` or `all`), used in three-phase mode.                 |
 | `requested_power`           | The power level requested by **Solar Optimizer**.                                           |
 | `duration_sec`              | The total **activation duration** in seconds.                                               |
 | `duration_power_sec`        | The duration of the **last power change** in seconds.                                       |

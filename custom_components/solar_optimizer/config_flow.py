@@ -64,6 +64,8 @@ class SolarOptimizerBaseConfigFlow(FlowHandler):
                 errors[str(err)] = "unknown_entity"
             except InvalidTime as err:
                 errors[str(err)] = "format_time_invalid"
+            except PhaseEntityRequired as err:
+                errors[str(err)] = "phase_entity_required"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -112,6 +114,9 @@ class SolarOptimizerBaseConfigFlow(FlowHandler):
             CONF_SELL_COST_ENTITY_ID,
             CONF_BUY_COST_ENTITY_ID,
             CONF_SELL_TAX_PERCENT_ENTITY_ID,
+            CONF_POWER_CONSUMPTION_L1_ENTITY_ID,
+            CONF_POWER_CONSUMPTION_L2_ENTITY_ID,
+            CONF_POWER_CONSUMPTION_L3_ENTITY_ID,
         ]:
             d = data.get(conf, None)  # pylint: disable=invalid-name
             if not isinstance(d, list):
@@ -123,6 +128,11 @@ class SolarOptimizerBaseConfigFlow(FlowHandler):
                         e,
                     )
                     raise UnknownEntity(conf)
+
+        if data.get(CONF_PHASE_MODE) == CONF_PHASE_MODE_THREE:
+            for conf in [CONF_POWER_CONSUMPTION_L1_ENTITY_ID, CONF_POWER_CONSUMPTION_L2_ENTITY_ID, CONF_POWER_CONSUMPTION_L3_ENTITY_ID]:
+                if not data.get(conf):
+                    raise PhaseEntityRequired(conf)
 
         for conf in [CONF_RAZ_TIME, CONF_OFFPEAK_TIME]:
             try:

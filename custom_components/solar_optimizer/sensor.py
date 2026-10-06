@@ -120,6 +120,10 @@ class SolarOptimizerSensorEntity(CoordinatorEntity, SensorEntity):
             return
 
         self._attr_native_value = value
+        if self.idx == "power_consumption":
+            # Three-phase: expose the net consumption of each phase (l1, l2, l3)
+            phases = self.coordinator.data.get("power_consumption_phases")
+            self._attr_extra_state_attributes = {f"l{p}": v for p, v in phases.items()} if phases else {}
         self.async_write_ha_state()
 
     @property
