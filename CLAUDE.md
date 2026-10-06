@@ -9,6 +9,19 @@ Rama de trabajo: `claude/solar-optimizer-improvements-6ynf06`
 No se debe abrir Pull Request hasta que el usuario lo pida explícitamente — probar
 todo a fondo primero. Todo el trabajo se pushea a esa rama en el fork.
 
+## Estado del PR (06/10/2026)
+
+**PR abierto: https://github.com/jmcollin78/solar_optimizer/pull/215** con Fase 1 + Fase 2 +
+ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
+- Rama del PR: `feature/manual-override-measured-power` en el fork, creada desde
+  `upstream/main`, **un solo commit** a nombre del usuario. Esta rama `claude/...`
+  NO se usa para PRs: tiene commits con autor "Claude" y el CLAUDE.md.
+- Regla para PRs futuros: rama limpia desde `upstream/main`, aplicar el diff sin
+  CLAUDE.md ni carpetas internas, sin referencias a "Fase"/puntos internos ni a
+  Claude en código, tests, commits o descripción. PR en inglés (repo externo).
+- Si el maintainer pide cambios: hacerlos en `feature/manual-override-measured-power`
+  y replicarlos acá para mantener ambas ramas alineadas.
+
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
 - **Estado real al día de hoy**: la rama `claude/solar-optimizer-improvements-6ynf06`
