@@ -229,6 +229,11 @@ El usuario copió la rama a su HA y no vio cambios. Diagnóstico y correcciones:
 - **Real > presupuesto**: la barra se pinta naranja (`--warning-color`), el número
   también, y una marca vertical indica dónde termina el presupuesto. El gráfico
   agranda la escala y la línea queda sobre la punteada del presupuesto.
+- **Traducciones**: faltaba la etiqueta de `measured_power_entity_id` en el paso
+  `device` (on/off). Nuevo `translations/es.json` (español neutro) y tabla `es` en la
+  card; la card elige idioma con `translator(lang)` y cae a inglés por clave. Al
+  agregar campos nuevos, actualizar strings.json + en/fr/it/es en **ambos** pasos
+  (`device` y `powered_device`) de config y options.
 
 ## Pendiente / próximos pasos sugeridos
 

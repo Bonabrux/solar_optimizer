@@ -98,7 +98,63 @@ const TRANSLATIONS = {
     editorNote: '<strong>Note:</strong> No optional parameters or additional YAML configuration are needed for this card to work!',
     editorSecondaryInfoDesc: 'Display custom info per device (supports <code>states()</code> and <code>state_attr()</code>):',
     cardDescription: 'Interactive card to control and monitor devices managed by the Solar Optimizer load scheduler.',
+  },
+  es: {
+    disabled: 'Desactivado',
+    active: 'Activo',
+    waiting: 'En espera',
+    inactive: 'Inactivo',
+    manual: 'Manual',
+    usable: 'Disponible',
+    waitingIndicator: 'En espera',
+    offpeakForced: 'Tarifa reducida forzada',
+    priority: 'Prioridad',
+    enableTitle: 'Activar/desactivar la gestión por el algoritmo',
+    stopManually: 'Detener manualmente',
+    startManually: 'Iniciar manualmente',
+    stop: 'Detener',
+    start: 'Iniciar',
+    nextAvailable: 'Próxima disponibilidad',
+    powerAvailable: 'Cambio de potencia disponible',
+    offpeakHours: 'Tarifa reducida',
+    batterySocThreshold: 'Umbral de batería',
+    onTime: 'Tiempo encendido',
+    resetTitle: 'Reiniciar el contador de tiempo encendido',
+    reset: 'Reiniciar',
+    timedDurationSelect: 'Duración forzada',
+    timedRemaining: 'Restante',
+    timedDuration1h: '1h',
+    timedDuration4h: '4h',
+    timedDuration12h: '12h',
+    timedDuration24h: '24h',
+    expand: 'Expandir',
+    collapse: 'Contraer',
+    expandAll: 'Expandir todo',
+    collapseAll: 'Contraer todo',
+    managedDevices: 'Dispositivos gestionados',
+    noDevices: 'No se encontró ningún dispositivo gestionado.',
+    requiredPower: 'Potencia solicitada',
+    smoothedProduction: 'Producción suavizada',
+    netConsumption: 'Consumo neto',
+    batterySoc: 'Carga de batería',
+    totalOptimized: 'Total optimizado',
+    algoObjective: 'Objetivo del algoritmo',
+    availableNow: 'Disponible ahora',
+    historyBar: 'Historial de activación',
+    powerHistory: 'Potencia',
+    editorHistoryHours: 'Duración del historial (horas)',
+    editorAutoConfig: 'Esta tarjeta se configura automáticamente.',
+    editorDesc: 'Detecta y agrupa automáticamente las medidas del algoritmo y todos los switches y entidades de prioridad que empiezan con <code>solar_optimizer</code>.',
+    editorNote: '<strong>Nota:</strong> ¡No hace falta ningún parámetro opcional ni configuración YAML adicional para que esta tarjeta funcione!',
+    editorSecondaryInfoDesc: 'Mostrar información personalizada por dispositivo (admite <code>states()</code> y <code>state_attr()</code>):',
+    cardDescription: 'Tarjeta interactiva para controlar y seguir los dispositivos gestionados por el planificador de cargas Solar Optimizer.',
   }
+};
+
+// Traduction selon la langue de HA (fr, es, sinon en), avec repli sur l'anglais par clé
+const translator = (lang) => {
+  const table = TRANSLATIONS[(lang || 'en').slice(0, 2).toLowerCase()] || TRANSLATIONS.en;
+  return (key) => table[key] || TRANSLATIONS.en[key] || key;
 };
 
 class SolarOptimizerCard extends HTMLElement {
@@ -459,8 +515,7 @@ class SolarOptimizerCard extends HTMLElement {
     if (!this._collapsedDevices) this._collapsedDevices = {};
 
     const lang = this._hass.locale?.language;
-    const isFr = lang && lang.toLowerCase().startsWith('fr');
-    const t = (key) => TRANSLATIONS[isFr ? 'fr' : 'en'][key] || key;
+    const t = translator(lang);
 
     // Formate une date ISO en heure locale avec secondes
     // Si la date est dans le passé, retourne le texte de disponibilité immédiate
@@ -1235,8 +1290,7 @@ class SolarOptimizerCardEditor extends HTMLElement {
 
   _render() {
     const lang = this._hass?.locale?.language || navigator.language || 'en';
-    const isFr = lang.toLowerCase().startsWith('fr');
-    const t = (key) => TRANSLATIONS[isFr ? 'fr' : 'en'][key] || key;
+    const t = translator(lang);
     const historyHours = (this._config && this._config.history_hours) ? this._config.history_hours : 24;
 
     this.innerHTML = `
