@@ -70,6 +70,9 @@ managed_device_schema = vol.Schema(
             selector.EntitySelectorConfig(domain=[INPUT_BOOLEAN_DOMAIN, SWITCH_DOMAIN, HUMIDIFIER_DOMAIN, CLIMATE_DOMAIN, FAN_DOMAIN, LIGHT_DOMAIN, SELECT_DOMAIN, BUTTON_DOMAIN])
         ),
         vol.Required(CONF_POWER_MAX): str,
+        vol.Optional(CONF_MEASURED_POWER_ENTITY_ID): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=SENSOR_DOMAIN, device_class="power")
+        ),
         vol.Optional(CONF_CHECK_USABLE_TEMPLATE, default="{{ True }}"): str,
         vol.Optional(CONF_CHECK_ACTIVE_TEMPLATE): str,
         vol.Optional(CONF_DURATION_MIN, default="60"): selector.NumberSelector(selector.NumberSelectorConfig(min=0.0, max=1440, step=0.1, mode=selector.NumberSelectorMode.BOX)),
@@ -116,6 +119,9 @@ power_managed_device_schema = vol.Schema(
         vol.Optional(CONF_POWER_MIN, default=220): vol.Coerce(float),
         vol.Required(CONF_POWER_MAX): str,
         vol.Optional(CONF_POWER_STEP, default=220): vol.All(vol.Coerce(float), vol.Range(min=0, min_included=False)),
+        vol.Optional(CONF_MEASURED_POWER_ENTITY_ID): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=SENSOR_DOMAIN, device_class="power")
+        ),
         vol.Optional(CONF_CHECK_USABLE_TEMPLATE, default="{{ True }}"): str,
         vol.Optional(CONF_CHECK_ACTIVE_TEMPLATE): str,
         vol.Optional(CONF_DURATION_MIN, default="60"): selector.NumberSelector(selector.NumberSelectorConfig(min=0.0, max=1440, step=0.1, mode=selector.NumberSelectorMode.BOX)),

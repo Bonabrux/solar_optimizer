@@ -1,5 +1,5 @@
 """ Test a climate device """
-from unittest.mock import patch, call
+from unittest.mock import patch, call, ANY
 # from datetime import datetime
 
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
@@ -73,6 +73,7 @@ async def test_climate_device(
                         target= {
                             "entity_id": "climate.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -94,6 +95,7 @@ async def test_climate_device(
                         target= {
                             "entity_id": "climate.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -158,6 +160,7 @@ async def test_humidifier_device(
                         target= {
                             "entity_id": "humidifier.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -177,6 +180,7 @@ async def test_humidifier_device(
                         target= {
                             "entity_id": "humidifier.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -242,6 +246,7 @@ async def test_fan_device(
                         target= {
                             "entity_id": "fan.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -261,6 +266,7 @@ async def test_fan_device(
                         target= {
                             "entity_id": "fan.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -326,6 +332,7 @@ async def test_light_device(
                         target= {
                             "entity_id": "light.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -345,6 +352,7 @@ async def test_light_device(
                         target= {
                             "entity_id": "light.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -412,6 +420,7 @@ async def test_select_device(
                         target= {
                             "entity_id": "select.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -433,6 +442,7 @@ async def test_select_device(
                         target= {
                             "entity_id": "select.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
@@ -494,6 +504,7 @@ async def test_button_device(
                         target= {
                             "entity_id": "button.fake_device_a",
                         },
+                        context=ANY,
                     ),
                 ]
             )
