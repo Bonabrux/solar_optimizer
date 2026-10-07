@@ -352,6 +352,13 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
 Commits: `ebcb4e5` (base), `522a185` (clicks card), `ea6d836` (override re-disparado),
 `6eb4162` (on time today perdido al reiniciar si se muestra en min/h: RestoreSensor),
 `ebf8bd4` (atribución en el registro de actividad). Todos a nombre del usuario, sin
-CLAUDE.md. La descripción del PR todavía no menciona los 4 commits posteriores.
+CLAUDE.md. La descripción del PR ya incluye la sección "Follow-up commits" con los 4 posteriores.
 El usuario verificó en su HA: atribución OK, contador real se mantiene tras reinicio.
+
+## Próximo paso (07/10/2026)
+
+El usuario sigue probando `claude/three-phase` (trifásico, uso de batería, card) un par de
+días más. Después: preparar el PR de Fases 3-4 en una rama limpia (desde la rama del PR
+#215 si todavía no se mergeó, o desde `upstream/main` si ya se mergeó), mostrarle rama,
+archivos y texto, y esperar su OK final antes de crearlo.
 
