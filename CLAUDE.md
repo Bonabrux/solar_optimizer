@@ -347,3 +347,11 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
 - Arreglo del override re-disparado al re-habilitar (07/10): `set_enable(True)` toma el
   estado real como nueva referencia. También en el PR #215 (commit `ea6d836`).
 
+## PR #215 al 07/10/2026
+
+Commits: `ebcb4e5` (base), `522a185` (clicks card), `ea6d836` (override re-disparado),
+`6eb4162` (on time today perdido al reiniciar si se muestra en min/h: RestoreSensor),
+`ebf8bd4` (atribución en el registro de actividad). Todos a nombre del usuario, sin
+CLAUDE.md. La descripción del PR todavía no menciona los 4 commits posteriores.
+El usuario verificó en su HA: atribución OK, contador real se mantiene tras reinicio.
+
