@@ -332,3 +332,18 @@ Requisito del usuario: monofásico debe quedar EXACTAMENTE igual (fase = 1 siemp
 - Umbral de batería del dispositivo: el usuario pidió mantener el nombre original
   ("Umbral de carga de batería"); solo se mejoró la descripción (0 = sin restricción).
 - Arreglo de clicks perdidos de la card también está en el PR #215 (commit 522a185).
+
+## Atribución en el registro de actividad (07/10/2026, en `claude/three-phase`)
+
+- El usuario NO quiere un usuario de sistema "Solar Optimizer" en HA (descartado).
+- Cada acción dispara primero el evento `solar_optimizer_action` (device_name, entity_id,
+  action, service configurado del dispositivo o None en modo evento, requested_power)
+  con el mismo Context: al ser el primer evento, es el `origin_event` y el logbook usa su
+  descripción (`logbook.py`, idioma = `hass.config.language`) como causa del cambio.
+- Test de punta a punta con recorder + logbook reales en `tests/test_logbook.py`
+  (`mock_component(hass, "frontend")`, fixture autouse sobrescrito para pedir
+  `recorder_mock` antes que `hass`). El texto exacto lo arma el frontend: confirmar en el
+  HA del usuario.
+- Arreglo del override re-disparado al re-habilitar (07/10): `set_enable(True)` toma el
+  estado real como nueva referencia. También en el PR #215 (commit `ea6d836`).
+

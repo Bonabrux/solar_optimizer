@@ -59,6 +59,9 @@ def phase_shares(phase: str | None) -> dict[str, float]:
 
 EVENT_TYPE_SOLAR_OPTIMIZER_CHANGE_POWER = "solar_optimizer_change_power_event"
 EVENT_TYPE_SOLAR_OPTIMIZER_STATE_CHANGE = "solar_optimizer_state_change_event"
+# Fired first with the Context of each action, so the logbook shows Solar Optimizer as
+# the origin of the change of the device (see logbook.py)
+EVENT_TYPE_SOLAR_OPTIMIZER_ACTION = "solar_optimizer_action"
 
 EVENT_TYPE_SOLAR_OPTIMIZER_ENABLE_STATE_CHANGE = (
     "solar_optimizer_enable_state_change_event"
