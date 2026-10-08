@@ -349,5 +349,12 @@
                 "use_battery": "Puede usar la batería"
             }
         }
+    },
+    "entity": {
+        "switch": {
+            "respect_manual_changes": {
+                "name": "Respetar cambios manuales"
+            }
+        }
     }
 }
