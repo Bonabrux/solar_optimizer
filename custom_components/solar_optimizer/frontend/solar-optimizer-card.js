@@ -42,7 +42,6 @@ const TRANSLATIONS = {
     powerMismatch: 'Écart réel',
     gridExport: 'Non utilisé',
     gridImport: 'Importé',
-    powerMismatchHelp: 'Puissance réelle encore injectée ou importée après la décision de Solar Optimizer, chaque phase comptée séparément. 0 = idéal. Utile surtout en triphasé avec un comptage par phase : la consommation nette compense les phases entre elles, cette valeur non. En monophasé, elle anticipe la consommation nette du cycle suivant.',
     editorShowObjective: "Afficher l'objectif de l'algorithme",
     editorShowMismatch: "Afficher l'écart réel",
     editorMismatchGreen: 'Écart réel : vert en dessous de (W)',
@@ -104,7 +103,6 @@ const TRANSLATIONS = {
     powerMismatch: 'Real mismatch',
     gridExport: 'Unused',
     gridImport: 'Importing',
-    powerMismatchHelp: 'Real power still exported or imported after the Solar Optimizer decision, each phase counted separately. 0 = ideal. Mostly useful in three-phase with per-phase metering: the net consumption offsets the phases against each other, this value does not. In single-phase, it anticipates the net consumption of the next cycle.',
     editorShowObjective: 'Show the algorithm objective',
     editorShowMismatch: 'Show the real mismatch',
     editorMismatchGreen: 'Real mismatch: green below (W)',
@@ -166,7 +164,6 @@ const TRANSLATIONS = {
     powerMismatch: 'Desajuste real',
     gridExport: 'Sin aprovechar',
     gridImport: 'Importando',
-    powerMismatchHelp: 'Potencia real que se sigue exportando o importando después de la decisión de Solar Optimizer, contando cada fase por separado. 0 = ideal. Útil sobre todo en trifásica con medición por fase: el consumo neto compensa las fases entre sí, este valor no. En monofásica, anticipa el consumo neto del próximo ciclo.',
     editorShowObjective: 'Mostrar el objetivo del algoritmo',
     editorShowMismatch: 'Mostrar el desajuste real',
     editorMismatchGreen: 'Desajuste real: verde por debajo de (W)',
@@ -933,9 +930,9 @@ class SolarOptimizerCard extends HTMLElement {
           <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(3) : bestObjective}</span>
         </div>` : ''}
         ${showMismatch ? `
-        <div class="so-stat-box" title="${t('powerMismatchHelp')}">
+        <div class="so-stat-box">
           <ha-icon icon="mdi:scale-unbalanced" style="color:${mismatchColor};margin-bottom:4px;"></ha-icon>
-          <span class="so-stat-title">${t('powerMismatch')} ⓘ</span>
+          <span class="so-stat-title">${t('powerMismatch')}</span>
           <span class="so-stat-value" style="color:${mismatchColor};">${!isNaN(mismatchW) ? fmtW(mismatchW) + ' W' : 'N/A'}</span>
           <span class="so-stat-title">${t('gridExport')} ${fmtW(mismatchAttrs.grid_export ?? 'N/A')} W · ${t('gridImport')} ${fmtW(mismatchAttrs.grid_import ?? 'N/A')} W</span>
         </div>` : ''}
