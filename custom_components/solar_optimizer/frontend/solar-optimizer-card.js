@@ -50,6 +50,8 @@ const TRANSLATIONS = {
     editorSecondaryInfoDesc: 'Affichez des informations personnalisées par appareil (supporte <code>states()</code> et <code>state_attr()</code>) :',
     batteryFirst: "Batterie d'abord : seulement le surplus après la charge de la batterie",
     useBattery: 'Utiliser la batterie : peut décharger la batterie',
+    respectManualChanges: 'Respecter les changements manuels',
+    editorShowRespect: 'Afficher « Respecter les changements manuels » dans chaque équipement',
     cardDescription: 'Carte interactive pour contrôler et suivre les appareils gérés par le planificateur de charges Solar Optimizer.',
   },
   en: {
@@ -103,6 +105,8 @@ const TRANSLATIONS = {
     editorSecondaryInfoDesc: 'Display custom info per device (supports <code>states()</code> and <code>state_attr()</code>):',
     batteryFirst: 'Battery first: only the surplus after charging the battery',
     useBattery: 'Use battery: may discharge the battery',
+    respectManualChanges: 'Respect manual changes',
+    editorShowRespect: 'Show "Respect manual changes" in each device',
     cardDescription: 'Interactive card to control and monitor devices managed by the Solar Optimizer load scheduler.',
   },
   es: {
@@ -156,6 +160,8 @@ const TRANSLATIONS = {
     editorSecondaryInfoDesc: 'Mostrar información personalizada por dispositivo (admite <code>states()</code> y <code>state_attr()</code>):',
     batteryFirst: 'Batería primero: solo el excedente después de cargar la batería',
     useBattery: 'Puede usar la batería: puede descargar la batería',
+    respectManualChanges: 'Respetar cambios manuales',
+    editorShowRespect: 'Mostrar "Respetar cambios manuales" en cada dispositivo',
     cardDescription: 'Tarjeta interactiva para controlar y seguir los dispositivos gestionados por el planificador de cargas Solar Optimizer.',
   }
 };
@@ -724,6 +730,15 @@ class SolarOptimizerCard extends HTMLElement {
         ></ha-switch>
       `;
 
+      // Switch "Respect manual changes" (option de la carte, masqué par défaut). Même
+      // classe que le toggle enable : synchronisation et clic sont déjà gérés.
+      const respectEntityKey = `switch.respect_manual_changes_solar_optimizer_${deviceId}`;
+      const respectHtml = (this._config?.show_respect_manual_changes && this._hass.states[respectEntityKey]) ? `
+        <div style="display:flex; align-items:center; gap:8px; margin-top:6px; font-size:0.85em;">
+          <ha-switch class="device-toggle" data-entity-id="${respectEntityKey}" title="${t('respectManualChanges')}"></ha-switch>
+          <span>${t('respectManualChanges')}</span>
+        </div>` : '';
+
       // Timed activation: forced_end_time depuis les attributs du switch
       const forcedEndTimeStr = attrs.forced_end_time || null;
       const forcedEndTime = forcedEndTimeStr ? new Date(forcedEndTimeStr) : null;
@@ -837,6 +852,7 @@ class SolarOptimizerCard extends HTMLElement {
               <div>${t('requiredPower')}: <strong>${requestedPower} W</strong></div>
             </div>
             ${availHtml}
+            ${respectHtml}
             <div style="display:flex; gap:12px; align-items:flex-start; margin-top:6px;">
               <div style="flex:1; min-width:0;">
                 ${this._renderHistoryBar(switchKey, t)}
@@ -1370,6 +1386,10 @@ class SolarOptimizerCardEditor extends HTMLElement {
           <input type="number" id="so-history-hours-input" min="1" max="168" value="${historyHours}"
             style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
         </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="so-show-respect-input" ${this._config?.show_respect_manual_changes ? 'checked' : ''}>
+          <label for="so-show-respect-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowRespect')}</label>
+        </div>
         <div style="margin-top: 16px;">
           <p style="font-size: 0.9em; color: var(--primary-text-color); margin-bottom: 4px;">${t('editorSecondaryInfoDesc')}</p>
           <pre style="font-size: 0.78em; background: var(--secondary-background-color, #f5f5f5); padding: 8px; border-radius: 4px; overflow-x: auto; color: var(--primary-text-color); margin: 0;">secondary_info:
@@ -1387,6 +1407,14 @@ class SolarOptimizerCardEditor extends HTMLElement {
           this._config = { ...this._config, history_hours: value };
           this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config }, bubbles: true, composed: true }));
         }
+      });
+    }
+
+    const showRespect = this.querySelector("#so-show-respect-input");
+    if (showRespect) {
+      showRespect.addEventListener("change", (e) => {
+        this._config = { ...this._config, show_respect_manual_changes: e.target.checked };
+        this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config }, bubbles: true, composed: true }));
       });
     }
   }
