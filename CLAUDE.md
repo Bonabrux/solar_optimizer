@@ -362,3 +362,25 @@ días más. Después: preparar el PR de Fases 3-4 en una rama limpia (desde la r
 #215 si todavía no se mergeó, o desde `upstream/main` si ya se mergeó), mostrarle rama,
 archivos y texto, y esperar su OK final antes de crearlo.
 
+## Override opcional pedido por el maintainer (08-09/10/2026)
+
+Jean-Marc (dueño upstream) no quiere que SO siga cambios hechos en el dispositivo por
+defecto (caso: enchufa el auto y SO debe cortar la carga si no hay condiciones). Aceptó la
+función si es opcional, como **entidad switch** del dispositivo (no en la configuración):
+- `switch.respect_manual_changes_solar_optimizer_<device>` ("Respect manual changes",
+  `translation_key`), apagado por defecto, restaurado al reiniciar. Apagado = comportamiento
+  original para las DOS vías (cambio en el dispositivo y switch de SO). Apagarlo libera el
+  override. `ManagedDevice.set_respect_manual_changes()` / `respect_manual_changes`.
+- Card: opción `show_respect_manual_changes` (oculta por defecto, casilla en el editor) que
+  muestra el toggle en el detalle expandido de cada dispositivo.
+- `tests/test_override_scenarios.py`: escenarios con ciclos reales del coordinator, tiempo
+  simulado y consumo que sigue a los dispositivos (respect ON/OFF, raz_time, Enable,
+  clear_override, ventana de espera, switch de SO, aislamiento entre dispositivos).
+  Verificado por mutación (4 errores introducidos, todos detectados). Suite: 158 passed en
+  `claude/three-phase`, 140 en la rama del PR (HA 2026.6.1 y 2026.9.4).
+
+**Rama del PR: 3 commits SOLO EN LOCAL, sin pushear** (`409825a` switch, `29bf246` card,
+`1740933` tests). El usuario quiere probar todo en su HA antes de subirlos. Pendiente:
+pushear con su OK, responder a Jean-Marc (borrador ya propuesto) y agregar las líneas a
+"Follow-up commits" de la descripción del PR.
+
