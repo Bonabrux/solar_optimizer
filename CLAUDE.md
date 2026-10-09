@@ -27,18 +27,27 @@ ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
 
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
-**Estado al 06/10/2026 (fin de sesión):**
-- PR #215 abierto upstream con Fases 1-2 + arreglo de clicks perdidos de la card
-  (commits `ebcb4e5` y `522a185` en `feature/manual-override-measured-power`). Esperando
-  revisión del maintainer.
-- En `claude/three-phase`, implementado y pusheado, **pendiente de prueba real del
-  usuario en su HA**: Fase 3 (trifásico), Fase 4 (uso de batería por dispositivo + ícono
-  en la card), y ajustes de la card (1 decimal, "Desajuste" en W con colores, descripción
-  del umbral de batería; el nombre del campo se mantuvo "Umbral de carga de batería" a
-  pedido del usuario).
-- **Próximo paso:** el usuario prueba en su HA y vuelve con resultados. Después, si está
-  conforme, preparar un PR de Fases 3-4 (rama limpia, apilado sobre #215 o tras su merge)
-  y pedir OK final antes de crearlo.
+**Estado al 09/10/2026 (fin de sesión):** el usuario va a probar todo en su HA unos días.
+
+- **PR #215** (upstream, abierto): Jean-Marc aceptó el override si es opcional, como switch
+  del dispositivo apagado por defecto. En GitHub están `ebcb4e5` a `ebf8bd4`.
+  **En la rama del PR hay 4 commits SOLO EN LOCAL, sin pushear** (`409825a` switch
+  "Respect manual changes", `29bf246` toggle opcional en la card, `1740933` tests de
+  escenarios, `e5c02a3` README para usuarios nuevos). Al retomar: si el usuario quedó
+  conforme, pedirle el OK, pushearlos, publicar (o darle para pegar) el comentario para
+  Jean-Marc (borrador abajo, sección "Override opcional...") y agregar las líneas a
+  "Follow-up commits" de la descripción del PR.
+- **`claude/three-phase`** (pusheada, al día): todo lo anterior más trifásico, uso de
+  batería por dispositivo, ajustes de la card, y el objetivo de Jean-Marc intacto con el
+  sensor nuevo `power_mismatch` opcional en la card. Nada de esto va al PR #215.
+- **Pendiente de prueba real del usuario:** "Respect manual changes" (ON/OFF), toggle y
+  opciones de la card (objetivo, desajuste real, umbrales), trifásico, uso de batería.
+- **Después:** PR aparte para trifásico + batería (+ desajuste real si el usuario lo
+  quiere), en rama limpia, con su OK final antes de crearlo.
+- Reglas del usuario: preguntar antes de cambiar cualquier cosa; nunca crear ni
+  actualizar un PR sin su OK; las traducciones de nombres de entidades NO se tocan
+  (decisión del 09/10); el tooltip del desajuste real queda corto (la nota de trifásico
+  va solo en el README).
 
 **Traer el código en otra PC:**
 ```bash
