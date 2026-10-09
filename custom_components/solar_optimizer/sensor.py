@@ -65,8 +65,9 @@ async def async_setup_entry(
         entity4 = SolarOptimizerSensorEntity(coordinator, hass, "power_production_brut")
         entity5 = SolarOptimizerSensorEntity(coordinator, hass, "power_consumption")
         entity6 = SolarOptimizerSensorEntity(coordinator, hass, "battery_soc")
+        entity7 = SolarOptimizerSensorEntity(coordinator, hass, "power_mismatch")
 
-        async_add_entities([entity1, entity2, entity3, entity4, entity5, entity6], False)
+        async_add_entities([entity1, entity2, entity3, entity4, entity5, entity6, entity7], False)
 
         await coordinator.configure(entry)
         return
@@ -120,8 +121,12 @@ class SolarOptimizerSensorEntity(CoordinatorEntity, SensorEntity):
             return
 
         self._attr_native_value = value
-        if self.idx == "best_objective":
-            self._attr_extra_state_attributes = {"mismatch": self.coordinator.data.get("mismatch")}
+        if self.idx == "power_mismatch":
+            # Real power still imported from / exported to the grid after the decision
+            self._attr_extra_state_attributes = {
+                "grid_import": self.coordinator.data.get("grid_import"),
+                "grid_export": self.coordinator.data.get("grid_export"),
+            }
         if self.idx == "power_consumption":
             # Three-phase: expose the net consumption of each phase (l1, l2, l3)
             phases = self.coordinator.data.get("power_consumption_phases")

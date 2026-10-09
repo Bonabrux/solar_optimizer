@@ -419,9 +419,10 @@ Tout changement dans la configuration avancée nécessite un arrêt / relance de
 ## L'appareil "configuration"
 L'intégration, une fois correctement configurée, créée un appareil (device) nommé 'configuration' qui contient plusieurs entités :
 1. un sensor nommé "total_power" qui est le total de toutes les puissances des équipements commandés par Solar Optimizer,
-2. un sensor nommé "best_objective" qui est la valeur de la fonction de coût (cf. fonctionnement de l'algo). Plus la valeur est faible et plus la solution trouvée est bonne. Son attribut `mismatch` en est une version lisible : la puissance encore importée ou injectée après la solution, en W, pondérée par leur coût et sans la part priorité. 0 est l'idéal,
+2. un sensor nommé "best_objective" qui est la valeur de la fonction de coût (cf. fonctionnement de l'algo). Plus la valeur est faible et plus la solution trouvée est bonne. C'est un *coût fictif* (cf. [Réglage des coûts d'achat et de revente](#réglage-des-coûts-dachat-et-de-revente)), pas un montant en argent,
 3. un sensor nommé "power_production" qui est la dernière valeur de la production solaire lissée (si l'option a été choisie) prise en compte,
 3. un sensor nommé "power_production_brut" qui est la dernière valeur de la production solaire brute prise en compte.
+4. un sensor nommé "power_mismatch" qui est la puissance **réelle**, en W, encore injectée (attribut `grid_export`) ou importée (attribut `grid_import`) après la décision de l'algorithme, additionnées. 0 est l'idéal. La puissance de charge ou de décharge de la batterie n'est pas comptée. Affichage seulement : l'algorithme ne l'utilise pas.
 4. une liste de choix nommé "Priority weight" qui est le poids donné à la gestion de la priorité par rapport à l'optimisation de la consommation solaire. Cf. [la gestion de la priorité](#la-gestion-de-la-priorité)
 
 ![Configuration entités](images/entities-configuration.png)
@@ -708,7 +709,17 @@ Un bloc d'en-tête **Solar Optimizer** affiche en temps réel :
 - La puissance nette consommée,
 - Le SOC de la batterie (si configurée),
 - Le total de puissance alloué par l'algorithme,
-- L'objectif courant de l'algorithme.
+- L'objectif courant de l'algorithme,
+- En option, l'écart réel (`power_mismatch`) : la puissance encore non utilisée (injectée) et importée après la décision, en vert, orange ou rouge.
+
+Le bloc d'en-tête affiche l'objectif de l'algorithme par défaut. L'écart réel peut aussi être affiché, et ses seuils de couleur modifiés, avec ces options (aussi disponibles dans l'éditeur de la carte) :
+
+| Paramètre               | Type      | Valeur par défaut | Description                                                         |
+| ----------------------- | --------- | ----------------- | ------------------------------------------------------------------- |
+| `show_objective`        | `boolean` | `true`            | Affiche l'objectif de l'algorithme (`best_objective`)               |
+| `show_power_mismatch`   | `boolean` | `false`           | Affiche l'écart réel (`power_mismatch`)                             |
+| `mismatch_green_below`  | `number`  | `100`             | L'écart réel est vert en dessous de cette valeur (W)                |
+| `mismatch_orange_below` | `number`  | `500`             | L'écart réel est orange en dessous de cette valeur (W), rouge au-delà |
 
 ## Informations par équipement
 

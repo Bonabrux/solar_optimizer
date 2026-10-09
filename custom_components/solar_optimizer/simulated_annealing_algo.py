@@ -239,22 +239,6 @@ class SimulatedAnnealingAlgorithm:
         """
 
         puissance_totale_eqt = self.consommation_equipements(solution)
-        consumption_coef = self.calculer_desajuste(solution)
-        # calculate the priority coef as the sum of the priority of all devices
-        # in the solution
-        if puissance_totale_eqt > 0:
-            priority_coef = sum((equip["priority"] * equip["requested_power"] / puissance_totale_eqt) for i, equip in enumerate(solution) if equip["state"])
-        else:
-            priority_coef = 0
-        priority_weight = self._priority_weight
-
-        ret = consumption_coef * (1.0 - priority_weight) + priority_coef * priority_weight
-        return ret
-
-    def calculer_desajuste(self, solution) -> float:
-        """The mismatch of a solution in W: import and export after the solution, weighted by
-        their cost (the two coefficients sum to 1). 0 is ideal. This is the objective without
-        the priority part."""
         puissance_phases = self.consommation_phases(solution)
         puissance_phases_bf = self.consommation_phases(solution, BATTERY_POLICY_BATTERY_FIRST)
         puissance_phases_ub = self.consommation_phases(solution, BATTERY_POLICY_USE_BATTERY)
@@ -284,7 +268,30 @@ class SimulatedAnnealingAlgorithm:
                     new_rejets,
                 )
             consumption_coef += coef_import * new_import + coef_rejets * new_rejets
-        return consumption_coef
+        # calculate the priority coef as the sum of the priority of all devices
+        # in the solution
+        if puissance_totale_eqt > 0:
+            priority_coef = sum((equip["priority"] * equip["requested_power"] / puissance_totale_eqt) for i, equip in enumerate(solution) if equip["state"])
+        else:
+            priority_coef = 0
+        priority_weight = self._priority_weight
+
+        ret = consumption_coef * (1.0 - priority_weight) + priority_coef * priority_weight
+        return ret
+
+    def bilan_reseau(self, solution) -> tuple[float, float]:
+        """The real power, in W and not weighted by the costs, that would still be imported
+        from and exported to the grid after this solution, summed over the phases. The
+        battery is assumed to keep its current power: its charging power is not counted
+        as export, its discharge is not counted as import. Display only: the algorithm
+        does not use it."""
+        puissance_phases = self.consommation_phases(solution)
+        grid_import = grid_export = 0.0
+        for phase, consommation_net in self._consommation_net.items():
+            reseau = consommation_net - self._batterie.get(phase, 0) + puissance_phases[phase] - self._puissance_phases_initiale[phase]
+            grid_import += max(0.0, reseau)
+            grid_export += max(0.0, -reseau)
+        return grid_import, grid_export
 
     def generer_solution_initiale(self, solution):
         """Generate the initial solution (which is the solution given in argument) and calculate the total initial power"""

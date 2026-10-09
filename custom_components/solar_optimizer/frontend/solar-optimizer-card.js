@@ -38,8 +38,15 @@ const TRANSLATIONS = {
     netConsumption: 'Consommation nette',
     batterySoc: 'SOC Batterie',
     totalOptimized: 'Total Optimisé',
-    algoObjective: 'Écart',
-    algoObjectiveHelp: 'Puissance mal utilisée (importée ou injectée, pondérée par leur coût). 0 = idéal : toute la production solaire est consommée sans import. Vert < 100 W, orange < 500 W, rouge au-delà.',
+    algoObjective: 'Objectif Algo',
+    powerMismatch: 'Écart réel',
+    gridExport: 'Non utilisé',
+    gridImport: 'Importé',
+    powerMismatchHelp: 'Puissance réelle encore injectée ou importée après la décision de Solar Optimizer. 0 = idéal.',
+    editorShowObjective: "Afficher l'objectif de l'algorithme",
+    editorShowMismatch: "Afficher l'écart réel",
+    editorMismatchGreen: 'Écart réel : vert en dessous de (W)',
+    editorMismatchOrange: 'Écart réel : orange en dessous de (W)',
     availableNow: 'Disponible immédiatement',
     historyBar: 'Historique d\'activation',
     powerHistory: 'Puissance courante',
@@ -93,8 +100,15 @@ const TRANSLATIONS = {
     netConsumption: 'Net consumption',
     batterySoc: 'Battery SOC',
     totalOptimized: 'Total optimized',
-    algoObjective: 'Mismatch',
-    algoObjectiveHelp: 'Power not well used (imported or exported, weighted by their cost). 0 = ideal: all the solar production is consumed without import. Green < 100 W, orange < 500 W, red above.',
+    algoObjective: 'Algo objective',
+    powerMismatch: 'Real mismatch',
+    gridExport: 'Unused',
+    gridImport: 'Importing',
+    powerMismatchHelp: 'Real power still exported or imported after the Solar Optimizer decision. 0 = ideal.',
+    editorShowObjective: 'Show the algorithm objective',
+    editorShowMismatch: 'Show the real mismatch',
+    editorMismatchGreen: 'Real mismatch: green below (W)',
+    editorMismatchOrange: 'Real mismatch: orange below (W)',
     availableNow: 'Available immediately',
     historyBar: 'Activation history',
     powerHistory: 'Current power',
@@ -148,8 +162,15 @@ const TRANSLATIONS = {
     netConsumption: 'Consumo neto',
     batterySoc: 'Carga de batería',
     totalOptimized: 'Total optimizado',
-    algoObjective: 'Desajuste',
-    algoObjectiveHelp: 'Potencia mal aprovechada (importada o exportada, ponderada por su costo). 0 = ideal: toda la producción solar se consume sin importar. Verde < 100 W, naranja < 500 W, rojo por encima.',
+    algoObjective: 'Objetivo del algoritmo',
+    powerMismatch: 'Desajuste real',
+    gridExport: 'Sin aprovechar',
+    gridImport: 'Importando',
+    powerMismatchHelp: 'Potencia real que se sigue exportando o importando después de la decisión de Solar Optimizer. 0 = ideal.',
+    editorShowObjective: 'Mostrar el objetivo del algoritmo',
+    editorShowMismatch: 'Mostrar el desajuste real',
+    editorMismatchGreen: 'Desajuste real: verde por debajo de (W)',
+    editorMismatchOrange: 'Desajuste real: naranja por debajo de (W)',
     availableNow: 'Disponible ahora',
     historyBar: 'Historial de activación',
     powerHistory: 'Potencia',
@@ -577,11 +598,18 @@ class SolarOptimizerCard extends HTMLElement {
     // Récupérer les entités centrales
     // Puissances avec 1 décimale (les capteurs peuvent remonter beaucoup de décimales)
     const fmtW = (v) => isNaN(parseFloat(v)) ? v : parseFloat(v).toFixed(1);
-    // Écart en W (import/export pondérés par leur coût, sans la part priorité) : 0 = idéal
-    const objectiveW = parseFloat(((getSoStateObj('best_objective') || {}).attributes || {}).mismatch);
-    const objectiveColor = isNaN(objectiveW) || objectiveW < 0 ? 'var(--secondary-text-color)'
-      : objectiveW < 100 ? 'var(--success-color, #4caf50)'
-      : objectiveW < 500 ? 'var(--warning-color, #ff9800)'
+    const bestObjective = getSoState('best_objective');
+    // Options : objectif de l'algo (affiché par défaut) et écart réel en W (masqué par défaut)
+    const showObjective = this._config?.show_objective !== false;
+    const showMismatch = this._config?.show_power_mismatch === true;
+    const mismatchObj = getSoStateObj('power_mismatch');
+    const mismatchW = parseFloat(mismatchObj ? mismatchObj.state : NaN);
+    const mismatchAttrs = (mismatchObj || {}).attributes || {};
+    const greenBelow = this._config?.mismatch_green_below ?? 100;
+    const orangeBelow = this._config?.mismatch_orange_below ?? 500;
+    const mismatchColor = isNaN(mismatchW) ? 'var(--secondary-text-color)'
+      : mismatchW < greenBelow ? 'var(--success-color, #4caf50)'
+      : mismatchW < orangeBelow ? 'var(--warning-color, #ff9800)'
       : 'var(--error-color, #f44336)';
     const totalPower = getSoState('total_power');
     const powerProduction = getSoState('power_production');
@@ -898,11 +926,19 @@ class SolarOptimizerCard extends HTMLElement {
           <span class="so-stat-title">${t('totalOptimized')}</span>
           <span class="so-stat-value">${fmtW(totalPower)} W</span>
         </div>
+        ${showObjective ? `
         <div class="so-stat-box">
           <ha-icon icon="mdi:bullseye-arrow" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
-          <span class="so-stat-title" title="${t('algoObjectiveHelp')}">${t('algoObjective')} ⓘ</span>
-          <span class="so-stat-value" style="color:${objectiveColor};" title="${t('algoObjectiveHelp')}">${!isNaN(objectiveW) ? Math.round(objectiveW) + ' W' : 'N/A'}</span>
-        </div>
+          <span class="so-stat-title">${t('algoObjective')}</span>
+          <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(3) : bestObjective}</span>
+        </div>` : ''}
+        ${showMismatch ? `
+        <div class="so-stat-box" title="${t('powerMismatchHelp')}">
+          <ha-icon icon="mdi:scale-unbalanced" style="color:${mismatchColor};margin-bottom:4px;"></ha-icon>
+          <span class="so-stat-title">${t('powerMismatch')} ⓘ</span>
+          <span class="so-stat-value" style="color:${mismatchColor};">${!isNaN(mismatchW) ? fmtW(mismatchW) + ' W' : 'N/A'}</span>
+          <span class="so-stat-title">${t('gridExport')} ${fmtW(mismatchAttrs.grid_export ?? 'N/A')} W · ${t('gridImport')} ${fmtW(mismatchAttrs.grid_import ?? 'N/A')} W</span>
+        </div>` : ''}
       </div>
       <div style="display:block;">
         <div style="display:flex; justify-content:flex-start; align-items:center; margin-bottom:12px; border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; gap:6px;">
@@ -1387,6 +1423,22 @@ class SolarOptimizerCardEditor extends HTMLElement {
             style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
         </div>
         <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="so-show-objective-input" ${this._config?.show_objective !== false ? 'checked' : ''}>
+          <label for="so-show-objective-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowObjective')}</label>
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="so-show-mismatch-input" ${this._config?.show_power_mismatch ? 'checked' : ''}>
+          <label for="so-show-mismatch-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowMismatch')}</label>
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+          <label style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorMismatchGreen')}</label>
+          <input type="number" id="so-mismatch-green-input" min="0" value="${this._config?.mismatch_green_below ?? 100}" style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+          <label style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorMismatchOrange')}</label>
+          <input type="number" id="so-mismatch-orange-input" min="0" value="${this._config?.mismatch_orange_below ?? 500}" style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" id="so-show-respect-input" ${this._config?.show_respect_manual_changes ? 'checked' : ''}>
           <label for="so-show-respect-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowRespect')}</label>
         </div>
@@ -1407,6 +1459,19 @@ class SolarOptimizerCardEditor extends HTMLElement {
           this._config = { ...this._config, history_hours: value };
           this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config }, bubbles: true, composed: true }));
         }
+      });
+    }
+
+    const setOption = (key, value) => {
+      this._config = { ...this._config, [key]: value };
+      this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config }, bubbles: true, composed: true }));
+    };
+    this.querySelector("#so-show-objective-input")?.addEventListener("change", (e) => setOption("show_objective", e.target.checked));
+    this.querySelector("#so-show-mismatch-input")?.addEventListener("change", (e) => setOption("show_power_mismatch", e.target.checked));
+    for (const [id, key] of [["#so-mismatch-green-input", "mismatch_green_below"], ["#so-mismatch-orange-input", "mismatch_orange_below"]]) {
+      this.querySelector(id)?.addEventListener("change", (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value >= 0) setOption(key, value);
       });
     }
 

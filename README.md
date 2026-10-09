@@ -440,10 +440,11 @@ The default values are suited for setups with around 20 devices (which results i
 Once the integration is properly configured, a **device** named `'configuration'` is created, containing several entities:
 
 1. A sensor named `total_power`: the total power of all devices controlled by Solar Optimizer.
-2. A sensor named `best_objective`: the cost function value (see algorithm operation). The **lower** the value, the **better** the solution. Its `mismatch` attribute is a readable version: the power still imported or exported after the solution, in W, weighted by their cost and without the priority part. 0 is ideal.
+2. A sensor named `best_objective`: the cost function value (see algorithm operation). The **lower** the value, the **better** the solution. It is a *fictitious cost* (see [Setting Purchase and Resale Costs](#setting-purchase-and-resale-costs)), not an amount of money.
 3. A sensor named `power_production`: the last **smoothed** solar production value considered (if the option is enabled).
 4. A sensor named `power_production_brut`: the last **raw** solar production value considered.
-5. a dropdown list named `priority weight` which defines the weight given to priority management compared to solar consumption optimization. See [priority management](#priority-management).
+5. A sensor named `power_mismatch`: the **real** power, in W, that is still exported to (`grid_export` attribute) or imported from (`grid_import` attribute) the grid after the decision of the algorithm, summed. 0 is ideal. The power charging or discharging the battery is not counted. Display only: the algorithm does not use it.
+6. a dropdown list named `priority weight` which defines the weight given to priority management compared to solar consumption optimization. See [priority management](#priority-management).
 
 ![Configuration Entities](images/entities-configuration.png)
 
@@ -748,7 +749,17 @@ A **Solar Optimizer** header block displays real-time:
 - Net consumed power,
 - Battery SOC (if configured),
 - Total power allocated by the algorithm,
-- Mismatch: the `mismatch` attribute of `best_objective` in W (0 = ideal), green below 100 W, orange below 500 W, red above.
+- The algorithm objective (`best_objective`),
+- Optionally, the real mismatch (`power_mismatch`): the power still unused (exported) and imported after the decision, colored green, orange or red.
+
+The header block shows the algorithm objective by default. The real mismatch can be shown too, and its color thresholds changed, with these options (also available in the card editor):
+
+| Parameter               | Type      | Default | Description                                               |
+| ----------------------- | --------- | ------- | --------------------------------------------------------- |
+| `show_objective`        | `boolean` | `true`  | Show the algorithm objective (`best_objective`)           |
+| `show_power_mismatch`   | `boolean` | `false` | Show the real mismatch (`power_mismatch`)                 |
+| `mismatch_green_below`  | `number`  | `100`   | The real mismatch is green below this value (W)           |
+| `mismatch_orange_below` | `number`  | `500`   | The real mismatch is orange below this value (W), red above |
 
 ## Per-Device Information
 

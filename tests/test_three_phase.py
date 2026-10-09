@@ -113,8 +113,9 @@ async def test_device_uses_its_own_phase_budget(hass: HomeAssistant, reset_coord
     )
     assert states == {"Device L1": True, "Device L2": False}
     assert data["power_consumption_phases"] == {"1": -1000, "2": 500, "3": 0}
-    # L2 still imports 500 W, import and export cost the same (0.5 each)
-    assert data["mismatch"] == 250
+    # real power left after the decision: L2 still imports 500 W, nothing exported
+    assert data["power_mismatch"] == 500
+    assert data["grid_import"] == 500 and data["grid_export"] == 0
 
 
 @pytest.mark.parametrize(
