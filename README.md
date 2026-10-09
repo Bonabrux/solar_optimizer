@@ -443,7 +443,7 @@ Once the integration is properly configured, a **device** named `'configuration'
 2. A sensor named `best_objective`: the cost function value (see algorithm operation). The **lower** the value, the **better** the solution. It is a *fictitious cost* (see [Setting Purchase and Resale Costs](#setting-purchase-and-resale-costs)), not an amount of money.
 3. A sensor named `power_production`: the last **smoothed** solar production value considered (if the option is enabled).
 4. A sensor named `power_production_brut`: the last **raw** solar production value considered.
-5. A sensor named `power_mismatch`: the **real** power, in W, that is still exported to (`grid_export` attribute) or imported from (`grid_import` attribute) the grid after the decision of the algorithm, summed. 0 is ideal. The power charging or discharging the battery is not counted. Display only: the algorithm does not use it.
+5. A sensor named `power_mismatch`: the **real** power, in W, that is still exported to (`grid_export` attribute) or imported from (`grid_import` attribute) the grid after the decision of the algorithm, summed. 0 is ideal. The power charging or discharging the battery is not counted. Each phase is counted separately, so it is mostly useful in three-phase with per-phase metering (see the note in [Global Information](#global-information)). Display only: the algorithm does not use it.
 6. a dropdown list named `priority weight` which defines the weight given to priority management compared to solar consumption optimization. See [priority management](#priority-management).
 
 ![Configuration Entities](images/entities-configuration.png)
@@ -760,6 +760,8 @@ The header block shows the algorithm objective by default. The real mismatch can
 | `show_power_mismatch`   | `boolean` | `false` | Show the real mismatch (`power_mismatch`)                 |
 | `mismatch_green_below`  | `number`  | `100`   | The real mismatch is green below this value (W)           |
 | `mismatch_orange_below` | `number`  | `500`   | The real mismatch is orange below this value (W), red above |
+
+> **Note:** the real mismatch is mostly useful in **three-phase installations with per-phase metering**. The net consumption sums the phases, so exporting 1000 W on L1 while importing 1000 W on L2 shows 0 W, whereas this power is really sold on one phase and bought on the other: the real mismatch shows 2000 W. In single-phase, it mainly anticipates the net consumption of the next cycle (the net consumption is measured before the decision, the real mismatch is estimated after it).
 
 ## Per-Device Information
 

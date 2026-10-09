@@ -422,7 +422,7 @@ L'intégration, une fois correctement configurée, créée un appareil (device) 
 2. un sensor nommé "best_objective" qui est la valeur de la fonction de coût (cf. fonctionnement de l'algo). Plus la valeur est faible et plus la solution trouvée est bonne. C'est un *coût fictif* (cf. [Réglage des coûts d'achat et de revente](#réglage-des-coûts-dachat-et-de-revente)), pas un montant en argent,
 3. un sensor nommé "power_production" qui est la dernière valeur de la production solaire lissée (si l'option a été choisie) prise en compte,
 3. un sensor nommé "power_production_brut" qui est la dernière valeur de la production solaire brute prise en compte.
-4. un sensor nommé "power_mismatch" qui est la puissance **réelle**, en W, encore injectée (attribut `grid_export`) ou importée (attribut `grid_import`) après la décision de l'algorithme, additionnées. 0 est l'idéal. La puissance de charge ou de décharge de la batterie n'est pas comptée. Affichage seulement : l'algorithme ne l'utilise pas.
+4. un sensor nommé "power_mismatch" qui est la puissance **réelle**, en W, encore injectée (attribut `grid_export`) ou importée (attribut `grid_import`) après la décision de l'algorithme, additionnées. 0 est l'idéal. La puissance de charge ou de décharge de la batterie n'est pas comptée. Chaque phase est comptée séparément, il est donc surtout utile en triphasé avec un comptage par phase (cf. la note dans [Informations globales](#informations-globales)). Affichage seulement : l'algorithme ne l'utilise pas.
 4. une liste de choix nommé "Priority weight" qui est le poids donné à la gestion de la priorité par rapport à l'optimisation de la consommation solaire. Cf. [la gestion de la priorité](#la-gestion-de-la-priorité)
 
 ![Configuration entités](images/entities-configuration.png)
@@ -720,6 +720,8 @@ Le bloc d'en-tête affiche l'objectif de l'algorithme par défaut. L'écart rée
 | `show_power_mismatch`   | `boolean` | `false`           | Affiche l'écart réel (`power_mismatch`)                             |
 | `mismatch_green_below`  | `number`  | `100`             | L'écart réel est vert en dessous de cette valeur (W)                |
 | `mismatch_orange_below` | `number`  | `500`             | L'écart réel est orange en dessous de cette valeur (W), rouge au-delà |
+
+> **Note :** l'écart réel est surtout utile pour les **installations triphasées avec un comptage par phase**. La consommation nette additionne les phases : injecter 1000 W sur L1 tout en important 1000 W sur L2 affiche 0 W, alors que cette puissance est réellement vendue sur une phase et achetée sur l'autre : l'écart réel affiche 2000 W. En monophasé, il anticipe surtout la consommation nette du cycle suivant (la consommation nette est mesurée avant la décision, l'écart réel est estimé après).
 
 ## Informations par équipement
 
