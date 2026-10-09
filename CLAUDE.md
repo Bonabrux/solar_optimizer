@@ -398,3 +398,15 @@ Borrador del comentario para Jean-Marc (a publicar cuando el usuario dé el OK):
 > - `e5c02a3`: README (en/fr) explains the feature for new users (off = previous behavior) and
 >   how to show the switch in the card.
 
+## Objetivo del algoritmo y desajuste real (09/10/2026, solo `claude/three-phase`)
+
+Decisión del usuario: no tocar el diseño de Jean-Marc. `best_objective` = su "costo
+ficticio" original (precios usados como pesos relativos que suman 1, no dinero), solo sin
+"€" (eso ya está en el PR #215). Se quitó el atributo ponderado `mismatch` /
+`calculer_desajuste()`: el cálculo del objetivo volvió al código anterior (idéntico a
+upstream en 500 escenarios). Nuevo sensor `power_mismatch` (W reales sin ponderar,
+atributos `grid_import`/`grid_export`, sin contar la batería; `bilan_reseau()` en el
+algoritmo, solo display). Card: `show_objective` (true), `show_power_mismatch` (false),
+`mismatch_green_below` (100), `mismatch_orange_below` (500), también en el editor.
+NO va al PR #215.
+
