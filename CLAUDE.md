@@ -379,8 +379,22 @@ función si es opcional, como **entidad switch** del dispositivo (no en la confi
   Verificado por mutación (4 errores introducidos, todos detectados). Suite: 158 passed en
   `claude/three-phase`, 140 en la rama del PR (HA 2026.6.1 y 2026.9.4).
 
-**Rama del PR: 3 commits SOLO EN LOCAL, sin pushear** (`409825a` switch, `29bf246` card,
-`1740933` tests). El usuario quiere probar todo en su HA antes de subirlos. Pendiente:
+**Rama del PR: 4 commits SOLO EN LOCAL, sin pushear** (`409825a` switch, `29bf246` card,
+`1740933` tests, `e5c02a3` README para usuarios nuevos: sección "Respect manual changes" y
+cómo mostrarlo en la card). El usuario quiere probar todo en su HA antes de subirlos. Pendiente:
 pushear con su OK, responder a Jean-Marc (borrador ya propuesto) y agregar las líneas a
 "Follow-up commits" de la descripción del PR.
+
+Borrador del comentario para Jean-Marc (a publicar cuando el usuario dé el OK):
+
+> Done:
+> - `409825a`: each managed device has a "Respect manual changes" switch entity, off by
+>   default. When off, Solar Optimizer behaves exactly as before, both for changes made on the
+>   device and on the SO switch (your EV case). When on, manual changes are respected as an
+>   override. Turning it off releases a pending override, and its state is restored at restart.
+> - `29bf246`: the card can show this switch in the expanded block of each device, with a
+>   `show_respect_manual_changes` option (hidden by default, also a checkbox in the card editor).
+> - `1740933`: scenario tests driving real coordinator cycles, with the switch on and off.
+> - `e5c02a3`: README (en/fr) explains the feature for new users (off = previous behavior) and
+>   how to show the switch in the card.
 
