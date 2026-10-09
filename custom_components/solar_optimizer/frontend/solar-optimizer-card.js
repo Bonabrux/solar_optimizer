@@ -42,6 +42,7 @@ const TRANSLATIONS = {
     powerMismatch: 'Écart réel',
     gridExport: 'Non utilisé',
     gridImport: 'Importé',
+    powerMismatchHelp: 'Puissance réelle encore injectée ou importée après la décision de Solar Optimizer. 0 = idéal.',
     editorShowObjective: "Afficher l'objectif de l'algorithme",
     editorShowMismatch: "Afficher l'écart réel",
     editorMismatchGreen: 'Écart réel : vert en dessous de (W)',
@@ -103,6 +104,7 @@ const TRANSLATIONS = {
     powerMismatch: 'Real mismatch',
     gridExport: 'Unused',
     gridImport: 'Importing',
+    powerMismatchHelp: 'Real power still exported or imported after the Solar Optimizer decision. 0 = ideal.',
     editorShowObjective: 'Show the algorithm objective',
     editorShowMismatch: 'Show the real mismatch',
     editorMismatchGreen: 'Real mismatch: green below (W)',
@@ -164,6 +166,7 @@ const TRANSLATIONS = {
     powerMismatch: 'Desajuste real',
     gridExport: 'Sin aprovechar',
     gridImport: 'Importando',
+    powerMismatchHelp: 'Potencia real que se sigue exportando o importando después de la decisión de Solar Optimizer. 0 = ideal.',
     editorShowObjective: 'Mostrar el objetivo del algoritmo',
     editorShowMismatch: 'Mostrar el desajuste real',
     editorMismatchGreen: 'Desajuste real: verde por debajo de (W)',
@@ -930,9 +933,9 @@ class SolarOptimizerCard extends HTMLElement {
           <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(3) : bestObjective}</span>
         </div>` : ''}
         ${showMismatch ? `
-        <div class="so-stat-box">
+        <div class="so-stat-box" title="${t('powerMismatchHelp')}">
           <ha-icon icon="mdi:scale-unbalanced" style="color:${mismatchColor};margin-bottom:4px;"></ha-icon>
-          <span class="so-stat-title">${t('powerMismatch')}</span>
+          <span class="so-stat-title">${t('powerMismatch')} ⓘ</span>
           <span class="so-stat-value" style="color:${mismatchColor};">${!isNaN(mismatchW) ? fmtW(mismatchW) + ' W' : 'N/A'}</span>
           <span class="so-stat-title">${t('gridExport')} ${fmtW(mismatchAttrs.grid_export ?? 'N/A')} W · ${t('gridImport')} ${fmtW(mismatchAttrs.grid_import ?? 'N/A')} W</span>
         </div>` : ''}
