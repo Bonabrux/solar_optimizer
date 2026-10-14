@@ -25,6 +25,20 @@ ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
 - Si el maintainer pide cambios: hacerlos en `feature/manual-override-measured-power`
   y replicarlos acá para mantener ambas ramas alineadas.
 
+## Upstream 3.9.0 integrado (14/10/2026) — NADA PUSHEADO
+
+- Rama del PR rebaseada en local sobre `upstream/main` (3.9.0): 9 commits, hashes nuevos
+  (`04d072b` base … `4b1c00f` switch, `41a4bef` card, `6c50b6f` tests, `1578f32` README).
+  Copia previa: `backup/pr215-pre-rebase`. Requiere `push --force-with-lease` con OK del usuario,
+  y actualizar los hashes en el borrador del comentario para Jean-Marc.
+- `claude/three-phase`: merge de `upstream/main` (`4b23ebe`) + fix de `bilan_reseau` sin cálculo
+  previo. Copia previa: `backup/three-phase-pre-merge`. Sin pushear.
+- `strings.json` ya no existe upstream: las etiquetas van solo en `translations/*.json`.
+- `es.json` no tiene todavía los campos nuevos de upstream (`max_on_time_offpeak_min`,
+  `offpeak_power`, errores) — HA cae a inglés.
+- Tests: PR 155 passed, three-phase 174 passed (HA 2026.6.1 y 2026.9.4).
+- El usuario prueba three-phase en su HA antes de pushear nada.
+
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
 **Estado al 09/10/2026 (fin de sesión):** el usuario va a probar todo en su HA unos días.
