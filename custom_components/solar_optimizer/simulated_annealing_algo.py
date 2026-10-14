@@ -46,6 +46,8 @@ class SimulatedAnnealingAlgorithm:
         self._temperature_minimale = min_temp
         self._facteur_refroidissement = cooling_factor
         self._nombre_iterations = max_iteration_number
+        # Empty until the first calculation: bilan_reseau() then reports nothing
+        self._consommation_net = {}
         _LOGGER.info(
             "Initializing the SimulatedAnnealingAlgorithm with initial_temp=%.2f min_temp=%.2f cooling_factor=%.2f max_iterations_number=%d",
             self._temperature_initiale,
