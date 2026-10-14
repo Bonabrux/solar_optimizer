@@ -15,6 +15,7 @@ from homeassistant.components.fan import DOMAIN as FAN_DOMAIN
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.select import DOMAIN as SELECT_DOMAIN
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
+from homeassistant.components.water_heater import DOMAIN as WATER_HEATER_DOMAIN
 
 
 from .const import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -85,7 +86,9 @@ managed_device_schema = vol.Schema(
     {
         vol.Required(CONF_NAME): str,
         vol.Required(CONF_ENTITY_ID): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=[INPUT_BOOLEAN_DOMAIN, SWITCH_DOMAIN, HUMIDIFIER_DOMAIN, CLIMATE_DOMAIN, FAN_DOMAIN, LIGHT_DOMAIN, SELECT_DOMAIN, BUTTON_DOMAIN])
+            selector.EntitySelectorConfig(
+                domain=[INPUT_BOOLEAN_DOMAIN, SWITCH_DOMAIN, HUMIDIFIER_DOMAIN, CLIMATE_DOMAIN, FAN_DOMAIN, LIGHT_DOMAIN, SELECT_DOMAIN, BUTTON_DOMAIN, WATER_HEATER_DOMAIN]
+            )
         ),
         vol.Required(CONF_POWER_MAX): str,
         vol.Optional(CONF_MEASURED_POWER_ENTITY_ID): selector.EntitySelector(
@@ -113,6 +116,7 @@ managed_device_schema = vol.Schema(
         ),
         vol.Optional(CONF_MAX_ON_TIME_PER_DAY_MIN): str,
         vol.Optional(CONF_MIN_ON_TIME_PER_DAY_MIN): str,
+        vol.Optional(CONF_MAX_ON_TIME_OFFPEAK_MIN): str,
         vol.Optional(CONF_OFFPEAK_TIME): str,
     }
 )
@@ -132,14 +136,16 @@ power_managed_device_schema = vol.Schema(
                 ]
             )
         ),
-        vol.Optional(CONF_POWER_ENTITY_ID): selector.EntitySelector(selector.EntitySelectorConfig(
-            domain=[
-                INPUT_NUMBER_DOMAIN,
-                NUMBER_DOMAIN,
-                FAN_DOMAIN,
-                LIGHT_DOMAIN,
-            ]
-        )),
+        vol.Optional(CONF_POWER_ENTITY_ID): selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain=[
+                    INPUT_NUMBER_DOMAIN,
+                    NUMBER_DOMAIN,
+                    FAN_DOMAIN,
+                    LIGHT_DOMAIN,
+                ]
+            )
+        ),
         vol.Optional(CONF_POWER_MIN, default=220): vol.Coerce(float),
         vol.Required(CONF_POWER_MAX): str,
         vol.Optional(CONF_POWER_STEP, default=220): vol.All(vol.Coerce(float), vol.Range(min=0, min_included=False)),
@@ -173,6 +179,8 @@ power_managed_device_schema = vol.Schema(
         ),
         vol.Optional(CONF_MAX_ON_TIME_PER_DAY_MIN): str,
         vol.Optional(CONF_MIN_ON_TIME_PER_DAY_MIN): str,
+        vol.Optional(CONF_MAX_ON_TIME_OFFPEAK_MIN): str,
         vol.Optional(CONF_OFFPEAK_TIME): str,
+        vol.Optional(CONF_OFFPEAK_POWER): str,
     }
 )

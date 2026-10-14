@@ -25,11 +25,15 @@
   - [Battery usage per device](#battery-usage-per-device)
   - [Configure the Devices](#configure-the-devices)
     - [Configuring a Simple Device (On/Off)](#configuring-a-simple-device-onoff)
+    - [Defining the Active Template](#defining-the-active-template)
   - [Configuring a Device with Variable Power](#configuring-a-device-with-variable-power)
+    - [Off-Peak Forcing](#off-peak-forcing)
+      - [Validation rules](#validation-rules)
   - [Configuration Examples](#configuration-examples)
     - [Controlling Tesla Charging](#controlling-tesla-charging)
     - [Controlling an Air Conditioner hvac mode](#controlling-an-air-conditioner-hvac-mode)
     - [Controlling an Air Conditioner preset](#controlling-an-air-conditioner-preset)
+    - [Controlling a Water Heater](#controlling-a-water-heater)
     - [Controlling a Dehumidifier](#controlling-a-dehumidifier)
     - [Control for a Light](#control-for-a-light)
     - [Control for a dimmable Light](#control-for-a-dimmable-light)
@@ -64,21 +68,15 @@
 
 
 >![New](https://github.com/jmcollin78/solar_optimizer/blob/main/images/new-icon.png?raw=true) _*News*_
+> * **release 3.9.0**:
+>   - `offpeak_power`: setpoint sent to a variable-power device when it is forced during off-peak hours; defaults to `power_max`.
+>   - `max_on_time_offpeak_min`: maximum amount of time any device may be forced during off-peak hours; it does not replace the daily minimum-duration target.
 > * **release 3.8.1**:
 >   - **Timed forced activation**: new duration selector (1h, 4h, 12h, 24h) next to the START button. When a duration is selected, the device is switched on in MANUAL mode for the chosen duration, then automatically turns off and returns control to SO. The timer is persisted across HA restarts. See [start\_device](#start_device) and [stop\_device](#stop_device)
 > * **release 3.8.0**:
 >   - **Device status clarification**: new `MANUAL` status (amber) when a device is physically active but SO management is disabled. The left border now always reflects the physical state (green = on, grey = off), independently of the SO control state. See [Device Status](#device-status)
 >   - **Secondary info**: new `secondary_info` option to display custom per-device information using templates. See [Secondary Info](#secondary-info)
 >   - **Collapsed by default**: all device blocks are collapsed on first load. The open/close state of each block is persisted in the browser `localStorage`.
-> * **release 3.7.0**:
->   - added an official native Lovelace card (`custom:solar-optimizer-card`) bundled with the integration. See [Official Lovelace Card](#official-lovelace-card)
-> * **release 3.5.0**:
->   - added support for priority management. See [Priority Management](#priority-management)
-> * **release 3.2.0** :
-> - Added an optional sensor for the net instantaneous power charged or discharged in the battery. This value is added to the net consumed power. Since the battery charging power affects the power available for the devices, it is taken into account. The sensor must report a value in watts, positive when the battery is discharging and negative when the battery is charging.
-> * **release 3.0.0** :
-> - Added a configuration UI for devices.
-> - ⚠️ Installing release 3.0.0 requires a specific procedure. See the migration procedure below [here](#migration-procedure-from-version-2x-to-3x).
 
 # What is Solar Optimizer?
 This integration will allow you to maximize the use of your solar production. You delegate to it the control of your equipment whose activation can be deferred over time (water heater, swimming pool pump, electric vehicle charge, dishwasher, washing machine, etc.) and it takes care of launching them when the power produced is sufficient.
@@ -241,7 +239,7 @@ You need to specify the following attributes:
 | Attribute                     | Applicable to                       | Meaning                                                                                                                                                                                                                                | Example                                          | Comment                                                                                                                                                                                                           |
 | ----------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`                        | All                                 | The name of the device.                                                                                                                                                                                                                | Basement Ventilation                             | The name is used to identify the entities of this device.                                                                                                                                                         |
-| `entity_id`                   | All                                 | The entity ID of the device to be controlled.                                                                                                                                                                                          | switch.basement_ventilation                      | Can be a `switch`, an `humidifier`, a `climate`, a `fan`, a `select` or a `light`. If it is not a `switch`, the `activation_service` and `deactivation_service` fields must be adjusted.                          |
+| `entity_id`                   | All                                 | The entity ID of the device to be controlled.                                                                                                                                                                                          | switch.basement_ventilation                      | Can be a `switch`, an `humidifier`, a `climate`, a `fan`, a `select`, a `light` or a `water_heater`. If it is not a `switch`, the `activation_service` and `deactivation_service` fields must be adjusted.        |
 | `device_power` or `power_max` | All                                 | The maximum power consumption of the device when turned on, in watts.                                                                                                                                                                  | 250                                              | -                                                                                                                                                                                                                 |
 | `check_usable_template`       | All                                 | A template that evaluates to `True` if the device can be used by Solar Optimizer. A template must start with `{{` and end with `}}`.                                                                                                   | {{ is_state('cover.garage_door', 'closed') }}    | In this example, Solar Optimizer will not attempt to control the "Basement Ventilation" if the garage door is open. Use `{{ True }}` if you do not need this condition.                                           |
 | `active_template`             | All                                 | A template that evaluates to `True` if the device is currently active. A template must start with `{{` and end with `}}`. This template is not necessary when the state of the device is 'on' or 'off' when turned-on or off.          | {{ is_state('climate.living_room_ac', 'cool') }} | In this example, a `climate` device will be considered active by Solar Optimizer if its state is `cool`. Leave it blank for devices where the default 'on'/'off' state applies (switches and input_booleans).     |
@@ -258,8 +256,37 @@ You need to specify the following attributes:
 | `measured_power_entity_id`    | All (optional)                      | A sensor measuring the real power consumption of the device, in W or kW (e.g. a smart plug).                                                                                                                                          | sensor.washing_machine_power                     | Display only: the card shows the measured power in the power bar and the power graph, with the configured power as a dashed reference line. The algorithm keeps using `power_max` as its budget.                  |
 | `offpeak_time`                | All                                 | The start time of off-peak hours in `hh:mm` format.                                                                                                                                                                                    | 22:00                                            | The device may be turned on at 22:00 if solar production during the day was insufficient.                                                                                                                         |
 
+### Defining the Active Template
+
+The `check_active_template` field tells Solar Optimizer whether the device is actually active. Leave it blank when the entity's `on` / `off` state directly represents activity. Otherwise, provide a template that returns `True` for the configured active mode.
+
+| Domain                                                  | Recommended `check_active_template` value                                                                                                                       |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `switch`, `input_boolean`, `light`, `humidifier`, `fan` | Leave blank when the `on` state means the device is active.                                                                                                     |
+| `climate` with an HVAC mode                             | `{{ is_state('climate.my_device', 'heat') }}`, or the selected mode, for example `cool`.                                                                        |
+| `climate` with a preset                                 | `{{ is_state_attr('climate.my_device', 'preset_mode', 'boost') }}`, or the selected preset.                                                                     |
+| `water_heater`                                          | `{{ is_state('water_heater.my_water_heater', 'eco') }}`, or the selected activation mode. Available modes depend on the integration.                            |
+| `select`                                                | `{{ is_state('select.my_device', 'active_option') }}` with the selected option as the active state.                                                             |
+| `button`                                                | Use the entity that reports the actual activity, for example `{{ is_state('binary_sensor.my_device_active', 'on') }}`. A button has no persistent active state. |
+
 ## Configuring a Device with Variable Power
 This type of device allows for adjusting the power consumption based on solar production and the algorithm's decisions. Essentially, it acts as a software-based solar router, enabling, for example, an electric vehicle to charge using only surplus solar energy.
+
+### Off-Peak Forcing
+
+- **`max_on_time_offpeak_min`** — Available for every device. This optional duration, expressed in minutes, limits **forced** operation during off-peak hours when the daily minimum duration has not yet been met. It can be a number or a template; when left blank, Solar Optimizer uses `max_on_time_per_day_min`. It does not replace `min_on_time_per_day_min`, which remains the target to achieve: it is only a safety limit. Its value must be non-negative, no greater than the daily maximum, and no lower than the daily minimum when that minimum is positive.
+- **`offpeak_power`** — Available only for variable-power devices. This number or template setpoint is explicitly sent when Solar Optimizer forces activation during off-peak hours. It is especially useful when a device resets its power to zero after being turned off. When left blank, Solar Optimizer sends `power_max`. It must be positive, between `power_min` and `power_max`, and aligned with `power_step`. On/off devices do not expose or use this setting.
+
+Invalid values are reported by the form and are not saved. If a template later resolves to an invalid value, the affected device is not controlled during that cycle.
+
+#### Validation rules
+
+| Parameter                 | Conditions                                                                                                                                                                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `max_on_time_offpeak_min` | Available for every device. The resolved value must be numeric and finite, greater than or equal to `0`, less than or equal to `max_on_time_per_day_min`, and greater than or equal to `min_on_time_per_day_min` when the latter is positive. |
+| `offpeak_power`           | Available only for variable-power devices. The resolved value must be numeric and finite, strictly greater than `0`, between `power_min` and `power_max`, and match a `power_step` increment starting at `power_min`.                         |
+
+When a template is used, Solar Optimizer validates its current result when the entry is saved whenever possible, then checks it again every time it is used.
 
 All the parameters described [here](#configuring-a-simple-device-onoff) apply and must be supplemented with the following:
 
@@ -312,7 +339,7 @@ To turn on an air conditioner if the temperature is above 27°C:
     entity_id: "climate.clim_salon"
     device_power: 1500
     check_usable_template: "{{ states('sensor.temperature_salon') | float(0) > 27 }}"
-    active_template: "{{ is_state('climate.vtherm', 'cool') }}"
+    check_active_template: "{{ is_state('climate.vtherm', 'cool') }}"
     # 1 h minimum
     duration_min: 60
     action_mode: "service_call"
@@ -329,7 +356,7 @@ To change the preset of an air conditioner if the temperature is above 27°C:
     entity_id: "climate.clim_salon"
     device_power: 1500
     check_usable_template: "{{ states('sensor.temperature_salon') | float(0) > 27 }}"
-    active_template: "{{ is_state_attr('climate.clim_salon', 'preset_mode', 'boost') }}"
+    check_active_template: "{{ is_state_attr('climate.clim_salon', 'preset_mode', 'boost') }}"
     # 1 h minimum
     duration_min: 60
     action_mode: "service_call"
@@ -337,6 +364,23 @@ To change the preset of an air conditioner if the temperature is above 27°C:
     deactivation_service: "climate/set_preset_mode/preset_mode:eco"
     battery_soc_threshold: 80
 ```
+
+  ### Controlling a Water Heater
+  To control a water heater operating mode:
+
+  ```yaml
+    name: "Water heater"
+    entity_id: "water_heater.hot_water_tank"
+    device_power: 1500
+    check_usable_template: "{{ True }}"
+    check_active_template: "{{ is_state('water_heater.hot_water_tank', 'eco') }}"
+    duration_min: 60
+    action_mode: "service_call"
+    activation_service: "water_heater/set_operation_mode/operation_mode:eco"
+    deactivation_service: "water_heater/set_operation_mode/operation_mode:off"
+  ```
+
+  `eco` and `off` are illustrative modes. The available operating modes depend on the Home Assistant integration that provides the water heater entity.
 
 ### Controlling a Dehumidifier
 To turn on a dehumidifier if the humidity exceeds a threshold for at least one hour per day, with the possibility of activation during off-peak hours:
