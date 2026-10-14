@@ -25,52 +25,49 @@ ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
 - Si el maintainer pide cambios: hacerlos en `feature/manual-override-measured-power`
   y replicarlos acá para mantener ambas ramas alineadas.
 
-## Upstream 3.9.0 integrado (14/10/2026) — NADA PUSHEADO
-
-- Rama del PR rebaseada en local sobre `upstream/main` (3.9.0): 9 commits, hashes nuevos
-  (`04d072b` base … `4b1c00f` switch, `41a4bef` card, `6c50b6f` tests, `1578f32` README).
-  Copia previa: `backup/pr215-pre-rebase`. Requiere `push --force-with-lease` con OK del usuario,
-  y actualizar los hashes en el borrador del comentario para Jean-Marc.
-- `claude/three-phase`: merge de `upstream/main` (`4b23ebe`) + fix de `bilan_reseau` sin cálculo
-  previo. Copia previa: `backup/three-phase-pre-merge`. Sin pushear.
-- `strings.json` ya no existe upstream: las etiquetas van solo en `translations/*.json`.
-- `es.json` no tiene todavía los campos nuevos de upstream (`max_on_time_offpeak_min`,
-  `offpeak_power`, errores) — HA cae a inglés.
-- Tests: PR 155 passed, three-phase 174 passed (HA 2026.6.1 y 2026.9.4).
-- El usuario prueba three-phase en su HA antes de pushear nada.
-- Opción nueva del dispositivo `active_switch_is_override` ("Consider Active switch action as
-  override", desmarcada por defecto): sin marcar, el switch Active de SO es una orden simple que el
-  algoritmo puede revertir; marcada (y con Respect ON) es override. Cambios en el dispositivo real
-  siguen siendo override. En ambas ramas (PR: `f2c8029`). El borrador del comentario para
-  Jean-Marc y el texto de `4b1c00f` ("las dos vías") hay que ajustarlos a esto.
-- Fix (14/10): el override no se detectaba durante la ventana de espera tras cada orden de SO
-  (`is_waiting`), y el switch Active re-aplicaba el context viejo de SO en cada refresco (registro
-  de actividad atribuía cambios manuales a SO). Ahora `_on_state_change` chequea en el momento y
-  usa el context del evento. Three-phase `9b0b745`, PR `b469e8d`. Tests 180 / 161.
-
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
-**Estado al 09/10/2026 (fin de sesión):** el usuario va a probar todo en su HA unos días.
+**Estado al 14/10/2026 (fin de sesión): TODO PUSHEADO. Esperando la respuesta de Jean-Marc
+en el PR #215.**
 
-- **PR #215** (upstream, abierto): Jean-Marc aceptó el override si es opcional, como switch
-  del dispositivo apagado por defecto. En GitHub están `ebcb4e5` a `ebf8bd4`.
-  **En la rama del PR hay 4 commits SOLO EN LOCAL, sin pushear** (`409825a` switch
-  "Respect manual changes", `29bf246` toggle opcional en la card, `1740933` tests de
-  escenarios, `e5c02a3` README para usuarios nuevos). Al retomar: si el usuario quedó
-  conforme, pedirle el OK, pushearlos, publicar (o darle para pegar) el comentario para
-  Jean-Marc (borrador abajo, sección "Override opcional...") y agregar las líneas a
-  "Follow-up commits" de la descripción del PR.
-- **`claude/three-phase`** (pusheada, al día): todo lo anterior más trifásico, uso de
-  batería por dispositivo, ajustes de la card, y el objetivo de Jean-Marc intacto con el
-  sensor nuevo `power_mismatch` opcional en la card. Nada de esto va al PR #215.
-- **Pendiente de prueba real del usuario:** "Respect manual changes" (ON/OFF), toggle y
-  opciones de la card (objetivo, desajuste real, umbrales), trifásico, uso de batería.
-- **Después:** PR aparte para trifásico + batería (+ desajuste real si el usuario lo
-  quiere), en rama limpia, con su OK final antes de crearlo.
-- Reglas del usuario: preguntar antes de cambiar cualquier cosa; nunca crear ni
-  actualizar un PR sin su OK; las traducciones de nombres de entidades NO se tocan
-  (decisión del 09/10); el tooltip del desajuste real queda corto (la nota de trifásico
-  va solo en el README).
+- **PR #215** (upstream, abierto, MERGEABLE): rama `feature/manual-override-measured-power`,
+  head `b469e8d`, rebaseada sobre upstream 3.9.0 (force push hecho). Descripción actualizada
+  y comentario publicado (https://github.com/jmcollin78/solar_optimizer/pull/215#issuecomment-6177825733).
+  Commits: `04d072b` base, `ca8b43c` clicks card, `120e2c9` override re-disparado, `0ac2a11` on
+  time al reiniciar, `fffb096` logbook, `4b1c00f` switch "Respect manual changes", `41a4bef`
+  card, `6c50b6f` tests de escenarios, `1578f32` README, `9733db6` es de campos de horario
+  valle, `f2c8029` opción `active_switch_is_override`, `b469e8d` detección durante la ventana
+  de espera + context. Copia vieja: `backup/pr215-pre-rebase`.
+- **Al retomar:** `gh pr view 215 --repo jmcollin78/solar_optimizer --comments` para ver si
+  respondió. Si pide cambios: hacerlos en la rama del PR, replicarlos en `claude/three-phase`,
+  correr tests en las dos versiones de HA, mostrarle al usuario diff y textos, y pushear /
+  responder solo con su OK.
+- **Escrituras en GitHub en modo automático:** el clasificador rechaza `gh pr edit` /
+  `gh pr comment` sin preguntar. Preparar el texto en un archivo del scratchpad y darle al
+  usuario el comando `! gh pr ... --body-file <archivo>` para que lo ejecute él.
+- **`claude/three-phase`** (pusheada): todo lo del PR más trifásico, uso de batería por
+  dispositivo, ajustes de la card y sensor `power_mismatch`. Incluye el merge de 3.9.0
+  (`4b23ebe`; copia vieja `backup/three-phase-pre-merge`). Tests: 180 passed, 11 skipped.
+- **Upstream 3.9.0:** `strings.json` ya no existe, las etiquetas van solo en
+  `translations/*.json` (en/fr/it/es, pasos `device` y `powered_device` de config y options).
+- **Opción `active_switch_is_override`** ("Consider Active switch action as override",
+  desmarcada por defecto): sin marcar, el switch Active de SO es una orden simple que el
+  algoritmo puede revertir; marcada (y con Respect ON) es override. Cambios en el dispositivo
+  real siguen siendo override. Ojo: el mensaje de `4b1c00f` dice que el switch cubre "las dos
+  vías"; se decidió dejarlo (f2c8029 explica el cambio).
+- **Fix del 14/10:** el override no se detectaba durante la ventana de espera tras cada orden
+  de SO (`is_waiting`), y el switch Active re-aplicaba el context viejo de SO en cada refresco
+  (el registro atribuía cambios manuales a SO). Ahora `_on_state_change` chequea en el momento
+  y usa el context del evento; el de SO se aplica una vez por acción. Verificado en el HA del
+  usuario.
+- **En pausa:** override no detectado tras un reinicio a la mañana (bomba de la pileta). El
+  usuario avisará si lo reproduce; el fix del 14/10 probablemente lo cubre.
+- **Después:** PR aparte para trifásico + batería (+ desajuste real si el usuario lo quiere),
+  en rama limpia desde `upstream/main` (o la del PR si no se mergeó), con su OK final.
+- Reglas del usuario: preguntar antes de cambiar cualquier cosa; no pushear ni tocar el PR
+  sin su OK; nunca acreditar a Claude; las traducciones de nombres de entidades NO se tocan;
+  el tooltip del desajuste real queda corto (la nota de trifásico va solo en el README).
+- HA del usuario: API en https://10.100.200.253:9943 (el token lo pasa él, no guardarlo).
 
 **Traer el código en otra PC:**
 ```bash
