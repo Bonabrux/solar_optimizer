@@ -43,6 +43,10 @@ ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
   algoritmo puede revertir; marcada (y con Respect ON) es override. Cambios en el dispositivo real
   siguen siendo override. En ambas ramas (PR: `f2c8029`). El borrador del comentario para
   Jean-Marc y el texto de `4b1c00f` ("las dos vías") hay que ajustarlos a esto.
+- Fix (14/10): el override no se detectaba durante la ventana de espera tras cada orden de SO
+  (`is_waiting`), y el switch Active re-aplicaba el context viejo de SO en cada refresco (registro
+  de actividad atribuía cambios manuales a SO). Ahora `_on_state_change` chequea en el momento y
+  usa el context del evento. Three-phase `9b0b745`, PR `b469e8d`. Tests 180 / 161.
 
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
