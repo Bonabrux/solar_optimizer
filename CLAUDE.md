@@ -38,6 +38,11 @@ ajustes del 06/10 (sensor de potencia medida, cache-busting, traducción es).
   `offpeak_power`, errores) — HA cae a inglés.
 - Tests: PR 155 passed, three-phase 174 passed (HA 2026.6.1 y 2026.9.4).
 - El usuario prueba three-phase en su HA antes de pushear nada.
+- Opción nueva del dispositivo `active_switch_is_override` ("Consider Active switch action as
+  override", desmarcada por defecto): sin marcar, el switch Active de SO es una orden simple que el
+  algoritmo puede revertir; marcada (y con Respect ON) es override. Cambios en el dispositivo real
+  siguen siendo override. En ambas ramas (PR: `f2c8029`). El borrador del comentario para
+  Jean-Marc y el texto de `4b1c00f` ("las dos vías") hay que ajustarlos a esto.
 
 ## Cómo retomar esto (sesión nueva, sin memoria de la conversación anterior)
 
