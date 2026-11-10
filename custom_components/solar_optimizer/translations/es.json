@@ -164,9 +164,9 @@
         },
         "error": {
             "format_time_invalid": "El formato de la hora debe ser HH:MM",
+            "phase_entity_required": "En trifásica son obligatorias las tres entidades de consumo por fase",
             "invalid_value": "El valor no es válido o no es compatible con los límites del dispositivo",
-            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día",
-            "phase_entity_required": "En trifásica son obligatorias las tres entidades de consumo por fase"
+            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día"
         }
     },
     "options": {
@@ -333,9 +333,9 @@
         },
         "error": {
             "format_time_invalid": "El formato de la hora debe ser HH:MM",
+            "phase_entity_required": "En trifásica son obligatorias las tres entidades de consumo por fase",
             "invalid_value": "El valor no es válido o no es compatible con los límites del dispositivo",
-            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día",
-            "phase_entity_required": "En trifásica son obligatorias las tres entidades de consumo por fase"
+            "invalid_offpeak_duration": "El tiempo máximo en tarifa reducida debe estar entre el mínimo y el máximo por día"
         }
     },
     "selector": {

@@ -39,6 +39,14 @@ const TRANSLATIONS = {
     batterySoc: 'SOC Batterie',
     totalOptimized: 'Total Optimisé',
     algoObjective: 'Objectif Algo',
+    powerMismatch: 'Écart réel',
+    gridExport: 'Non utilisé',
+    gridImport: 'Importé',
+    powerMismatchHelp: 'Puissance réelle encore injectée ou importée après la décision de Solar Optimizer. 0 = idéal.',
+    editorShowObjective: "Afficher l'objectif de l'algorithme",
+    editorShowMismatch: "Afficher l'écart réel",
+    editorMismatchGreen: 'Écart réel : vert en dessous de (W)',
+    editorMismatchOrange: 'Écart réel : orange en dessous de (W)',
     availableNow: 'Disponible immédiatement',
     historyBar: 'Historique d\'activation',
     powerHistory: 'Puissance courante',
@@ -47,10 +55,10 @@ const TRANSLATIONS = {
     editorDesc: 'Elle scanne et agrège automatiquement les mesures de l\'algorithme ainsi que tous vos commutateurs et entités de priorité commençant par <code>solar_optimizer</code>.',
     editorNote: '<strong>Note :</strong> Aucun paramètre optionnel ou configuration YAML supplémentaire n\'est nécessaire pour le fonctionnement de cette carte !',
     editorSecondaryInfoDesc: 'Affichez des informations personnalisées par appareil (supporte <code>states()</code> et <code>state_attr()</code>) :',
-    respectManualChanges: 'Respecter les changements manuels',
-    editorShowRespect: 'Afficher « Respecter les changements manuels » dans chaque équipement',
     batteryFirst: "Batterie d'abord : seulement le surplus après la charge de la batterie",
     useBattery: 'Utiliser la batterie : peut décharger la batterie',
+    respectManualChanges: 'Respecter les changements manuels',
+    editorShowRespect: 'Afficher « Respecter les changements manuels » dans chaque équipement',
     cardDescription: 'Carte interactive pour contrôler et suivre les appareils gérés par le planificateur de charges Solar Optimizer.',
   },
   en: {
@@ -93,6 +101,14 @@ const TRANSLATIONS = {
     batterySoc: 'Battery SOC',
     totalOptimized: 'Total optimized',
     algoObjective: 'Algo objective',
+    powerMismatch: 'Real mismatch',
+    gridExport: 'Unused',
+    gridImport: 'Importing',
+    powerMismatchHelp: 'Real power still exported or imported after the Solar Optimizer decision. 0 = ideal.',
+    editorShowObjective: 'Show the algorithm objective',
+    editorShowMismatch: 'Show the real mismatch',
+    editorMismatchGreen: 'Real mismatch: green below (W)',
+    editorMismatchOrange: 'Real mismatch: orange below (W)',
     availableNow: 'Available immediately',
     historyBar: 'Activation history',
     powerHistory: 'Current power',
@@ -101,10 +117,10 @@ const TRANSLATIONS = {
     editorDesc: 'It automatically scans and aggregates algorithm measurements and all your switches and priority entities starting with <code>solar_optimizer</code>.',
     editorNote: '<strong>Note:</strong> No optional parameters or additional YAML configuration are needed for this card to work!',
     editorSecondaryInfoDesc: 'Display custom info per device (supports <code>states()</code> and <code>state_attr()</code>):',
-    respectManualChanges: 'Respect manual changes',
-    editorShowRespect: 'Show "Respect manual changes" in each device',
     batteryFirst: 'Battery first: only the surplus after charging the battery',
     useBattery: 'Use battery: may discharge the battery',
+    respectManualChanges: 'Respect manual changes',
+    editorShowRespect: 'Show "Respect manual changes" in each device',
     cardDescription: 'Interactive card to control and monitor devices managed by the Solar Optimizer load scheduler.',
   },
   es: {
@@ -147,6 +163,14 @@ const TRANSLATIONS = {
     batterySoc: 'Carga de batería',
     totalOptimized: 'Total optimizado',
     algoObjective: 'Objetivo del algoritmo',
+    powerMismatch: 'Desajuste real',
+    gridExport: 'Sin aprovechar',
+    gridImport: 'Importando',
+    powerMismatchHelp: 'Potencia real que se sigue exportando o importando después de la decisión de Solar Optimizer. 0 = ideal.',
+    editorShowObjective: 'Mostrar el objetivo del algoritmo',
+    editorShowMismatch: 'Mostrar el desajuste real',
+    editorMismatchGreen: 'Desajuste real: verde por debajo de (W)',
+    editorMismatchOrange: 'Desajuste real: naranja por debajo de (W)',
     availableNow: 'Disponible ahora',
     historyBar: 'Historial de activación',
     powerHistory: 'Potencia',
@@ -155,10 +179,10 @@ const TRANSLATIONS = {
     editorDesc: 'Detecta y agrupa automáticamente las medidas del algoritmo y todos los switches y entidades de prioridad que empiezan con <code>solar_optimizer</code>.',
     editorNote: '<strong>Nota:</strong> ¡No hace falta ningún parámetro opcional ni configuración YAML adicional para que esta tarjeta funcione!',
     editorSecondaryInfoDesc: 'Mostrar información personalizada por dispositivo (admite <code>states()</code> y <code>state_attr()</code>):',
-    respectManualChanges: 'Respetar cambios manuales',
-    editorShowRespect: 'Mostrar "Respetar cambios manuales" en cada dispositivo',
     batteryFirst: 'Batería primero: solo el excedente después de cargar la batería',
     useBattery: 'Puede usar la batería: puede descargar la batería',
+    respectManualChanges: 'Respetar cambios manuales',
+    editorShowRespect: 'Mostrar "Respetar cambios manuales" en cada dispositivo',
     cardDescription: 'Tarjeta interactiva para controlar y seguir los dispositivos gestionados por el planificador de cargas Solar Optimizer.',
   }
 };
@@ -676,7 +700,21 @@ class SolarOptimizerCard extends HTMLElement {
     };
 
     // Récupérer les entités centrales
+    // Puissances avec 1 décimale (les capteurs peuvent remonter beaucoup de décimales)
+    const fmtW = (v) => isNaN(parseFloat(v)) ? v : parseFloat(v).toFixed(1);
     const bestObjective = getSoState('best_objective');
+    // Options : objectif de l'algo (affiché par défaut) et écart réel en W (masqué par défaut)
+    const showObjective = this._config?.show_objective !== false;
+    const showMismatch = this._config?.show_power_mismatch === true;
+    const mismatchObj = getSoStateObj('power_mismatch');
+    const mismatchW = parseFloat(mismatchObj ? mismatchObj.state : NaN);
+    const mismatchAttrs = (mismatchObj || {}).attributes || {};
+    const greenBelow = this._config?.mismatch_green_below ?? 100;
+    const orangeBelow = this._config?.mismatch_orange_below ?? 500;
+    const mismatchColor = isNaN(mismatchW) ? 'var(--secondary-text-color)'
+      : mismatchW < greenBelow ? 'var(--success-color, #4caf50)'
+      : mismatchW < orangeBelow ? 'var(--warning-color, #ff9800)'
+      : 'var(--error-color, #f44336)';
     const totalPower = getSoState('total_power');
     const powerProduction = getSoState('power_production');
     const powerConsumption = getSoState('power_consumption');
@@ -974,13 +1012,13 @@ class SolarOptimizerCard extends HTMLElement {
         <div class="so-stat-box">
           <ha-icon icon="mdi:solar-power-variant" style="color:var(--warning-color,#ff9800);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('smoothedProduction')}</span>
-          <span class="so-stat-value">${powerProduction} W</span>
+          <span class="so-stat-value">${fmtW(powerProduction)} W</span>
         </div>
         <div class="so-stat-box">
           <ha-icon icon="mdi:home-lightning-bolt" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('netConsumption')}</span>
-          <span class="so-stat-value">${powerConsumption} W</span>
-          ${threePhase ? `<span class="so-stat-title">${['1', '2', '3'].map(p => `${phaseLabel(p)} ${consumptionAttrs['l' + p] ?? 'N/A'}`).join(' · ')} W</span>` : ''}
+          <span class="so-stat-value">${fmtW(powerConsumption)} W</span>
+          ${threePhase ? `<span class="so-stat-title">${['1', '2', '3'].map(p => `${phaseLabel(p)} ${fmtW(consumptionAttrs['l' + p] ?? 'N/A')}`).join(' · ')} W</span>` : ''}
         </div>
         <div class="so-stat-box">
           <ha-icon icon="mdi:battery" style="color:var(--success-color,#4caf50);margin-bottom:4px;"></ha-icon>
@@ -990,13 +1028,21 @@ class SolarOptimizerCard extends HTMLElement {
         <div class="so-stat-box">
           <ha-icon icon="mdi:flash" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('totalOptimized')}</span>
-          <span class="so-stat-value">${totalPower} W</span>
+          <span class="so-stat-value">${fmtW(totalPower)} W</span>
         </div>
+        ${showObjective ? `
         <div class="so-stat-box">
           <ha-icon icon="mdi:bullseye-arrow" style="color:var(--primary-color);margin-bottom:4px;"></ha-icon>
           <span class="so-stat-title">${t('algoObjective')}</span>
           <span class="so-stat-value">${!isNaN(parseFloat(bestObjective)) ? parseFloat(bestObjective).toFixed(3) : bestObjective}</span>
-        </div>
+        </div>` : ''}
+        ${showMismatch ? `
+        <div class="so-stat-box" title="${t('powerMismatchHelp')}">
+          <ha-icon icon="mdi:scale-unbalanced" style="color:${mismatchColor};margin-bottom:4px;"></ha-icon>
+          <span class="so-stat-title">${t('powerMismatch')} ⓘ</span>
+          <span class="so-stat-value" style="color:${mismatchColor};">${!isNaN(mismatchW) ? fmtW(mismatchW) + ' W' : 'N/A'}</span>
+          <span class="so-stat-title">${t('gridExport')} ${fmtW(mismatchAttrs.grid_export ?? 'N/A')} W · ${t('gridImport')} ${fmtW(mismatchAttrs.grid_import ?? 'N/A')} W</span>
+        </div>` : ''}
       </div>
       <div style="display:block;">
         <div style="display:flex; justify-content:flex-start; align-items:center; margin-bottom:12px; border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; gap:6px;">
@@ -1481,6 +1527,22 @@ class SolarOptimizerCardEditor extends HTMLElement {
             style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
         </div>
         <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="so-show-objective-input" ${this._config?.show_objective !== false ? 'checked' : ''}>
+          <label for="so-show-objective-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowObjective')}</label>
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="so-show-mismatch-input" ${this._config?.show_power_mismatch ? 'checked' : ''}>
+          <label for="so-show-mismatch-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowMismatch')}</label>
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+          <label style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorMismatchGreen')}</label>
+          <input type="number" id="so-mismatch-green-input" min="0" value="${this._config?.mismatch_green_below ?? 100}" style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+          <label style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorMismatchOrange')}</label>
+          <input type="number" id="so-mismatch-orange-input" min="0" value="${this._config?.mismatch_orange_below ?? 500}" style="width: 72px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color, #ccc); background: var(--card-background-color, #fff); color: var(--primary-text-color); font-size: 0.9em;">
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" id="so-show-respect-input" ${this._config?.show_respect_manual_changes ? 'checked' : ''}>
           <label for="so-show-respect-input" style="font-size: 0.9em; color: var(--primary-text-color);">${t('editorShowRespect')}</label>
         </div>
@@ -1501,6 +1563,19 @@ class SolarOptimizerCardEditor extends HTMLElement {
           this._config = { ...this._config, history_hours: value };
           this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config }, bubbles: true, composed: true }));
         }
+      });
+    }
+
+    const setOption = (key, value) => {
+      this._config = { ...this._config, [key]: value };
+      this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config }, bubbles: true, composed: true }));
+    };
+    this.querySelector("#so-show-objective-input")?.addEventListener("change", (e) => setOption("show_objective", e.target.checked));
+    this.querySelector("#so-show-mismatch-input")?.addEventListener("change", (e) => setOption("show_power_mismatch", e.target.checked));
+    for (const [id, key] of [["#so-mismatch-green-input", "mismatch_green_below"], ["#so-mismatch-orange-input", "mismatch_orange_below"]]) {
+      this.querySelector(id)?.addEventListener("change", (e) => {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value) && value >= 0) setOption(key, value);
       });
     }
 

@@ -30,7 +30,6 @@ from .const import (
     name_to_unique_id,
     SOLAR_OPTIMIZER_DOMAIN,
     DEFAULT_RAZ_TIME,
-    ConfigurationError,
     CONF_PHASE_MODE,
     CONF_PHASE_MODE_THREE,
     CONF_POWER_CONSUMPTION_L1_ENTITY_ID,
@@ -41,6 +40,7 @@ from .const import (
     DEFAULT_PHASE,
     PHASES,
     phase_shares,
+    ConfigurationError,
 )
 from .managed_device import ManagedDevice
 from .simulated_annealing_algo import SimulatedAnnealingAlgorithm
@@ -306,6 +306,13 @@ class SolarOptimizerCoordinator(DataUpdateCoordinator):
 
         calculated_data["best_solution"] = best_solution
         calculated_data["best_objective"] = best_objective
+        # Real power (W, not weighted by the costs) still imported/exported after the
+        # decision: power_mismatch sensor, display only
+        if best_objective >= 0:
+            grid_import, grid_export = self._algo.bilan_reseau(best_solution)
+            calculated_data["power_mismatch"] = round(grid_import + grid_export, 1)
+            calculated_data["grid_import"] = round(grid_import, 1)
+            calculated_data["grid_export"] = round(grid_export, 1)
         calculated_data["total_power"] = total_power
 
         # Uses the result to turn on or off or change power

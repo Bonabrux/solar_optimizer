@@ -46,6 +46,8 @@ class SimulatedAnnealingAlgorithm:
         self._temperature_minimale = min_temp
         self._facteur_refroidissement = cooling_factor
         self._nombre_iterations = max_iteration_number
+        # Empty until the first calculation: bilan_reseau() then reports nothing
+        self._consommation_net = {}
         _LOGGER.info(
             "Initializing the SimulatedAnnealingAlgorithm with initial_temp=%.2f min_temp=%.2f cooling_factor=%.2f max_iterations_number=%d",
             self._temperature_initiale,
@@ -278,6 +280,20 @@ class SimulatedAnnealingAlgorithm:
 
         ret = consumption_coef * (1.0 - priority_weight) + priority_coef * priority_weight
         return ret
+
+    def bilan_reseau(self, solution) -> tuple[float, float]:
+        """The real power, in W and not weighted by the costs, that would still be imported
+        from and exported to the grid after this solution, summed over the phases. The
+        battery is assumed to keep its current power: its charging power is not counted
+        as export, its discharge is not counted as import. Display only: the algorithm
+        does not use it."""
+        puissance_phases = self.consommation_phases(solution)
+        grid_import = grid_export = 0.0
+        for phase, consommation_net in self._consommation_net.items():
+            reseau = consommation_net - self._batterie.get(phase, 0) + puissance_phases[phase] - self._puissance_phases_initiale[phase]
+            grid_import += max(0.0, reseau)
+            grid_export += max(0.0, -reseau)
+        return grid_import, grid_export
 
     def generer_solution_initiale(self, solution):
         """Generate the initial solution (which is the solution given in argument) and calculate the total initial power"""

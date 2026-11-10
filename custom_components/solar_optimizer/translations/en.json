@@ -164,9 +164,9 @@
         },
         "error": {
             "format_time_invalid": "Format of time should be HH:MM",
+            "phase_entity_required": "All three phase consumption entities are required in three-phase mode",
             "invalid_value": "The value is invalid or incompatible with the device limits",
-            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations",
-            "phase_entity_required": "All three phase consumption entities are required in three-phase mode"
+            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations"
         }
     },
     "options": {
@@ -333,9 +333,9 @@
         },
         "error": {
             "format_time_invalid": "Format of time should be HH:MM",
+            "phase_entity_required": "All three phase consumption entities are required in three-phase mode",
             "invalid_value": "The value is invalid or incompatible with the device limits",
-            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations",
-            "phase_entity_required": "All three phase consumption entities are required in three-phase mode"
+            "invalid_offpeak_duration": "The off-peak maximum duration must be between the daily minimum and maximum durations"
         }
     },
     "selector": {

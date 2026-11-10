@@ -110,3 +110,14 @@ async def test_three_phase_battery_first_on_battery_phase(hass: HomeAssistant, r
         },
     )
     assert states == {"Device L1": False}
+
+
+async def test_power_mismatch_does_not_count_battery_charging_as_export(hass: HomeAssistant, reset_coordinator):
+    """1000 W go into the battery and 300 W to the grid: a battery_first device of 1000 W
+    stays off, and the real mismatch is the 300 W exported, not 1300 W"""
+    coordinator = await setup(hass, CENTRAL_DATA, [("Pool", "input_boolean.fake_pool", 1000, "1", {CONF_BATTERY_POLICY: BATTERY_POLICY_BATTERY_FIRST})])
+    data, states = await run(hass, coordinator, {"sensor.fake_power_consumption": -300, "sensor.fake_battery_charge_power": -1000})
+    assert states == {"Pool": False}
+    assert data["power_mismatch"] == 300
+    assert data["grid_export"] == 300 and data["grid_import"] == 0
+
