@@ -49,6 +49,8 @@ const TRANSLATIONS = {
     editorSecondaryInfoDesc: 'Affichez des informations personnalisées par appareil (supporte <code>states()</code> et <code>state_attr()</code>) :',
     respectManualChanges: 'Respecter les changements manuels',
     editorShowRespect: 'Afficher « Respecter les changements manuels » dans chaque équipement',
+    batteryFirst: "Batterie d'abord : seulement le surplus après la charge de la batterie",
+    useBattery: 'Utiliser la batterie : peut décharger la batterie',
     cardDescription: 'Carte interactive pour contrôler et suivre les appareils gérés par le planificateur de charges Solar Optimizer.',
   },
   en: {
@@ -101,6 +103,8 @@ const TRANSLATIONS = {
     editorSecondaryInfoDesc: 'Display custom info per device (supports <code>states()</code> and <code>state_attr()</code>):',
     respectManualChanges: 'Respect manual changes',
     editorShowRespect: 'Show "Respect manual changes" in each device',
+    batteryFirst: 'Battery first: only the surplus after charging the battery',
+    useBattery: 'Use battery: may discharge the battery',
     cardDescription: 'Interactive card to control and monitor devices managed by the Solar Optimizer load scheduler.',
   },
   es: {
@@ -153,6 +157,8 @@ const TRANSLATIONS = {
     editorSecondaryInfoDesc: 'Mostrar información personalizada por dispositivo (admite <code>states()</code> y <code>state_attr()</code>):',
     respectManualChanges: 'Respetar cambios manuales',
     editorShowRespect: 'Mostrar "Respetar cambios manuales" en cada dispositivo',
+    batteryFirst: 'Batería primero: solo el excedente después de cargar la batería',
+    useBattery: 'Puede usar la batería: puede descargar la batería',
     cardDescription: 'Tarjeta interactiva para controlar y seguir los dispositivos gestionados por el planificador de cargas Solar Optimizer.',
   }
 };
@@ -744,6 +750,14 @@ class SolarOptimizerCard extends HTMLElement {
       // Au-delà du budget : barre pleine orange + repère à la position du budget
       const budgetMarkPercent = overBudget ? Math.round(((powerMax - powerMin) / (currentPower - powerMin)) * 100) : null;
 
+      // Politique batterie : icône seulement si différente du défaut et si la batterie
+      // concerne l'équipement (battery_soc est null pour une phase sans batterie)
+      const batteryPolicyIcons = { battery_first: ['mdi:battery-charging', 'batteryFirst'], use_battery: ['mdi:battery-arrow-down', 'useBattery'] };
+      const policyIcon = attrs.battery_soc !== null ? batteryPolicyIcons[attrs.battery_policy] : null;
+      const batteryPolicyIcon = policyIcon
+        ? `<ha-icon icon="${policyIcon[0]}" title="${t(policyIcon[1])}" style="--mdi-icon-size: 18px; color: var(--secondary-text-color);"></ha-icon>`
+        : '';
+
       let statusBadge = "";
       if (!isEnabled && isActive) {
         statusBadge = `<span class="so-badge so-badge-manual">${t('manual')}</span>`;
@@ -909,6 +923,7 @@ class SolarOptimizerCard extends HTMLElement {
               <span class="so-device-name">${attrs.device_name || deviceId}</span>
               ${statusBadge}
               ${threePhase && attrs.phase ? `<span class="so-badge so-badge-phase">${phaseLabel(attrs.phase)}</span>` : ''}
+              ${batteryPolicyIcon}
             </div>
             <div class="so-actions">
               ${startStopHtml}

@@ -32,6 +32,7 @@
                     "battery_soc_entity_id": "Estado de carga de la batería",
                     "battery_charge_power_entity_id": "Potencia de carga de la batería",
                     "battery_phase": "Fase de la batería / inversor híbrido",
+                    "battery_max_discharge_power": "Potencia máxima de descarga de la batería",
                     "raz_time": "Hora de reinicio de contadores"
                 },
                 "data_description": {
@@ -50,6 +51,7 @@
                     "battery_soc_entity_id": "El entity_id del estado de carga de la batería en %. Déjelo vacío si no tiene batería",
                     "battery_charge_power_entity_id": "El entity_id de la potencia neta de carga de la batería en W. Debe ser negativa cuando la batería carga y positiva cuando descarga. Déjelo vacío si no usa batería solar.",
                     "battery_phase": "Solo trifásica. La fase a la que está conectado el inversor de la batería, o todas las fases si el inversor es trifásico.",
+                    "battery_max_discharge_power": "Opcional. La potencia máxima de descarga del inversor de la batería en W, usada por los dispositivos que pueden usar la batería. Si está vacío, el límite es la descarga medida.",
                     "raz_time": "Hora de reinicio de los contadores de tiempo encendido. Debe ser antes de la primera exposición al sol, pero no demasiado temprano para dejar tiempo a la activación nocturna"
                 }
             },
@@ -71,6 +73,7 @@
                     "activation_service": "Servicio de activación",
                     "deactivation_service": "Servicio de desactivación",
                     "battery_soc_threshold": "Umbral de carga de batería",
+                    "battery_policy": "Uso de la batería",
                     "max_on_time_per_day_min": "Tiempo máximo encendido por día",
                     "min_on_time_per_day_min": "Tiempo mínimo encendido por día",
                     "max_on_time_offpeak_min": "Tiempo máximo encendido en tarifa reducida",
@@ -90,7 +93,8 @@
                     "action_mode": "El modo de acción del dispositivo: `service` para llamar a un servicio que lo encienda o apague, o `event` para enviar un evento",
                     "activation_service": "El servicio para activar el dispositivo. Ejemplo `switch/turn_on` o `climate/set_hvac_mode/hvac_mode:cool`",
                     "deactivation_service": "El servicio para desactivar el dispositivo. Ejemplo `switch/turn_off` o `climate/set_hvac_mode/hvac_mode:off`. Déjelo vacío si el dispositivo se apaga solo",
-                    "battery_soc_threshold": "El estado de carga mínimo de la batería para activar el dispositivo. Puede ser un número o una plantilla",
+                    "battery_soc_threshold": "El dispositivo solo se enciende si la batería solar tiene al menos este nivel de carga; por debajo, se apaga. 0 = sin restricción. Con 'Puede usar la batería', es el nivel hasta el que el dispositivo puede descargar la batería. Puede ser un número o una plantilla.",
+                    "battery_policy": "Cómo puede usar el dispositivo la batería solar. Batería primero: solo el excedente que sobra después de cargar la batería. Carga primero (por defecto): puede usar la potencia que iba a cargar la batería. Puede usar la batería: además puede descargar la batería hasta el umbral de batería. En trifásica, se ignora si el dispositivo no está en la fase de la batería.",
                     "max_on_time_per_day_min": "El tiempo máximo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza el mínimo durante el día, se activa en tarifa reducida hasta llegar al máximo",
                     "min_on_time_per_day_min": "El tiempo mínimo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza durante el día, se activa en tarifa reducida",
                     "max_on_time_offpeak_min": "El tiempo máximo forzado en tarifa reducida, en minutos. Por defecto es el máximo por día y debe estar entre el mínimo y el máximo por día.",
@@ -121,6 +125,7 @@
                     "change_power_service": "Servicio de cambio de potencia",
                     "convert_power_divide_factor": "Factor de división",
                     "battery_soc_threshold": "Umbral de carga de batería",
+                    "battery_policy": "Uso de la batería",
                     "max_on_time_per_day_min": "Tiempo máximo encendido por día",
                     "min_on_time_per_day_min": "Tiempo mínimo encendido por día",
                     "max_on_time_offpeak_min": "Tiempo máximo encendido en tarifa reducida",
@@ -147,7 +152,8 @@
                     "duration_power_min": "La duración mínima de cada cambio de potencia, en minutos",
                     "change_power_service": "El servicio para cambiar la potencia. Ejemplo `number/set_value`",
                     "convert_power_divide_factor": "El factor de división para convertir la potencia a las unidades del dispositivo. Para convertir W a amperes, el divisor debería ser 220",
-                    "battery_soc_threshold": "El estado de carga mínimo de la batería para activar el dispositivo. Puede ser un número o una plantilla",
+                    "battery_soc_threshold": "El dispositivo solo se enciende si la batería solar tiene al menos este nivel de carga; por debajo, se apaga. 0 = sin restricción. Con 'Puede usar la batería', es el nivel hasta el que el dispositivo puede descargar la batería. Puede ser un número o una plantilla.",
+                    "battery_policy": "Cómo puede usar el dispositivo la batería solar. Batería primero: solo el excedente que sobra después de cargar la batería. Carga primero (por defecto): puede usar la potencia que iba a cargar la batería. Puede usar la batería: además puede descargar la batería hasta el umbral de batería. En trifásica, se ignora si el dispositivo no está en la fase de la batería.",
                     "max_on_time_per_day_min": "El tiempo máximo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza el mínimo durante el día, se activa en tarifa reducida hasta llegar al máximo",
                     "min_on_time_per_day_min": "El tiempo mínimo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza durante el día, se activa en tarifa reducida",
                     "max_on_time_offpeak_min": "El tiempo máximo forzado en tarifa reducida, en minutos. Por defecto es el máximo por día y debe estar entre el mínimo y el máximo por día.",
@@ -195,6 +201,7 @@
                     "battery_soc_entity_id": "Estado de carga de la batería",
                     "battery_charge_power_entity_id": "Potencia de carga de la batería",
                     "battery_phase": "Fase de la batería / inversor híbrido",
+                    "battery_max_discharge_power": "Potencia máxima de descarga de la batería",
                     "raz_time": "Hora de reinicio de contadores"
                 },
                 "data_description": {
@@ -213,6 +220,7 @@
                     "battery_soc_entity_id": "El entity_id del estado de carga de la batería en %. Déjelo vacío si no tiene batería",
                     "battery_charge_power_entity_id": "El entity_id de la potencia neta de carga de la batería en W. Debe ser negativa cuando la batería carga y positiva cuando descarga. Déjelo vacío si no usa batería solar.",
                     "battery_phase": "Solo trifásica. La fase a la que está conectado el inversor de la batería, o todas las fases si el inversor es trifásico.",
+                    "battery_max_discharge_power": "Opcional. La potencia máxima de descarga del inversor de la batería en W, usada por los dispositivos que pueden usar la batería. Si está vacío, el límite es la descarga medida.",
                     "raz_time": "Hora de reinicio de los contadores de tiempo encendido. Debe ser antes de la primera exposición al sol, pero no demasiado temprano para dejar tiempo a la activación nocturna"
                 }
             },
@@ -234,6 +242,7 @@
                     "activation_service": "Servicio de activación",
                     "deactivation_service": "Servicio de desactivación",
                     "battery_soc_threshold": "Umbral de carga de batería",
+                    "battery_policy": "Uso de la batería",
                     "max_on_time_per_day_min": "Tiempo máximo encendido por día",
                     "min_on_time_per_day_min": "Tiempo mínimo encendido por día",
                     "max_on_time_offpeak_min": "Tiempo máximo encendido en tarifa reducida",
@@ -253,7 +262,8 @@
                     "action_mode": "El modo de acción del dispositivo: `service` para llamar a un servicio que lo encienda o apague, o `event` para enviar un evento",
                     "activation_service": "El servicio para activar el dispositivo. Ejemplo `switch/turn_on` o `climate/set_hvac_mode/hvac_mode:cool`",
                     "deactivation_service": "El servicio para desactivar el dispositivo. Ejemplo `switch/turn_off` o `climate/set_hvac_mode/hvac_mode:off`. Déjelo vacío si el dispositivo se apaga solo",
-                    "battery_soc_threshold": "El estado de carga mínimo de la batería para activar el dispositivo. Puede ser un número o una plantilla",
+                    "battery_soc_threshold": "El dispositivo solo se enciende si la batería solar tiene al menos este nivel de carga; por debajo, se apaga. 0 = sin restricción. Con 'Puede usar la batería', es el nivel hasta el que el dispositivo puede descargar la batería. Puede ser un número o una plantilla.",
+                    "battery_policy": "Cómo puede usar el dispositivo la batería solar. Batería primero: solo el excedente que sobra después de cargar la batería. Carga primero (por defecto): puede usar la potencia que iba a cargar la batería. Puede usar la batería: además puede descargar la batería hasta el umbral de batería. En trifásica, se ignora si el dispositivo no está en la fase de la batería.",
                     "max_on_time_per_day_min": "El tiempo máximo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza el mínimo durante el día, se activa en tarifa reducida hasta llegar al máximo",
                     "min_on_time_per_day_min": "El tiempo mínimo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza durante el día, se activa en tarifa reducida",
                     "max_on_time_offpeak_min": "El tiempo máximo forzado en tarifa reducida, en minutos. Por defecto es el máximo por día y debe estar entre el mínimo y el máximo por día.",
@@ -284,6 +294,7 @@
                     "change_power_service": "Servicio de cambio de potencia",
                     "convert_power_divide_factor": "Factor de división",
                     "battery_soc_threshold": "Umbral de carga de batería",
+                    "battery_policy": "Uso de la batería",
                     "max_on_time_per_day_min": "Tiempo máximo encendido por día",
                     "min_on_time_per_day_min": "Tiempo mínimo encendido por día",
                     "max_on_time_offpeak_min": "Tiempo máximo encendido en tarifa reducida",
@@ -310,7 +321,8 @@
                     "duration_power_min": "La duración mínima de cada cambio de potencia, en minutos",
                     "change_power_service": "El servicio para cambiar la potencia. Ejemplo `number/set_value`",
                     "convert_power_divide_factor": "El factor de división para convertir la potencia a las unidades del dispositivo. Para convertir W a amperes, el divisor debería ser 220",
-                    "battery_soc_threshold": "El estado de carga mínimo de la batería para activar el dispositivo. Puede ser un número o una plantilla",
+                    "battery_soc_threshold": "El dispositivo solo se enciende si la batería solar tiene al menos este nivel de carga; por debajo, se apaga. 0 = sin restricción. Con 'Puede usar la batería', es el nivel hasta el que el dispositivo puede descargar la batería. Puede ser un número o una plantilla.",
+                    "battery_policy": "Cómo puede usar el dispositivo la batería solar. Batería primero: solo el excedente que sobra después de cargar la batería. Carga primero (por defecto): puede usar la potencia que iba a cargar la batería. Puede usar la batería: además puede descargar la batería hasta el umbral de batería. En trifásica, se ignora si el dispositivo no está en la fase de la batería.",
                     "max_on_time_per_day_min": "El tiempo máximo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza el mínimo durante el día, se activa en tarifa reducida hasta llegar al máximo",
                     "min_on_time_per_day_min": "El tiempo mínimo encendido por día, en minutos. Puede ser un número o una plantilla. Si no se alcanza durante el día, se activa en tarifa reducida",
                     "max_on_time_offpeak_min": "El tiempo máximo forzado en tarifa reducida, en minutos. Por defecto es el máximo por día y debe estar entre el mínimo y el máximo por día.",
@@ -352,6 +364,13 @@
                 "2": "Fase 2 (L2)",
                 "3": "Fase 3 (L3)",
                 "all": "Trifásica (L1+L2+L3)"
+            }
+        },
+        "battery_policy": {
+            "options": {
+                "battery_first": "Batería primero",
+                "load_first": "Carga primero",
+                "use_battery": "Puede usar la batería"
             }
         }
     },

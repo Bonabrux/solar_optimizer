@@ -61,10 +61,11 @@ async def setup(hass, central_data, devices):
         MockConfigEntry(domain=DOMAIN, title="Central", unique_id="centralUniqueId", data=central_data),
         "centralUniqueId",
     )
-    for name, entity, power, phase in devices:
+    for name, entity, power, phase, *extra in devices:
+        data = {**device_data(name, entity, power, phase), **(extra[0] if extra else {})}
         await create_managed_device(
             hass,
-            MockConfigEntry(domain=DOMAIN, title=name, unique_id=name, data=device_data(name, entity, power, phase)),
+            MockConfigEntry(domain=DOMAIN, title=name, unique_id=name, data=data),
             name_to_unique_id(name),
         )
     return SolarOptimizerCoordinator.get_coordinator()

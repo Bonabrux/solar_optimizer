@@ -40,6 +40,14 @@ PHASES = ["1", "2", "3"]
 CONF_PHASE_OPTIONS = PHASES + [PHASE_ALL]
 DEFAULT_PHASE = "1"
 
+# Battery usage policy of a device. load_first is the historical behavior.
+CONF_BATTERY_POLICY = "battery_policy"
+BATTERY_POLICY_BATTERY_FIRST = "battery_first"  # only the surplus left after charging the battery
+BATTERY_POLICY_LOAD_FIRST = "load_first"  # may take the power charging the battery
+BATTERY_POLICY_USE_BATTERY = "use_battery"  # may also discharge the battery
+CONF_BATTERY_POLICIES = [BATTERY_POLICY_BATTERY_FIRST, BATTERY_POLICY_LOAD_FIRST, BATTERY_POLICY_USE_BATTERY]
+CONF_BATTERY_MAX_DISCHARGE_POWER = "battery_max_discharge_power"
+
 
 def phase_shares(phase: str | None) -> dict[str, float]:
     """Share of a load (or of the battery) on each phase: 1/3 per phase for a
